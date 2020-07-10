@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_FILE_SENDER_H_
-#define APRS_FILE_COPY_FILE_SENDER_H_
+#ifndef APRS_UTILS_APRS_FILE_COPY_FILE_SENDER_H_
+#define APRS_UTILS_APRS_FILE_COPY_FILE_SENDER_H_
 
 #include <string>
 
 #include "aprs_file_copy/tnc_connection.h"
 #include "util/non_copyable.h"
 
-namespace afc {
+namespace au {
 
 // An class that is responsible for sending a file over an APRS link.
 class FileSender : public NonCopyable {
@@ -42,6 +42,6 @@ class FileSender : public NonCopyable {
   TNCConnection tnc_connection_;
 };
 
-}  // namespace afc
+}  // namespace au
 
-#endif  // APRS_FILE_COPY_FILE_SENDER_H_
+#endif  // APRS_UTILS_APRS_FILE_COPY_FILE_SENDER_H_

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_UTIL_NON_COPYABLE_H_
-#define APRS_FILE_COPY_UTIL_NON_COPYABLE_H_
+#ifndef APRS_UTILS_UTIL_NON_COPYABLE_H_
+#define APRS_UTILS_UTIL_NON_COPYABLE_H_
 
-namespace afc {
+namespace au {
 
 // Marks a class as non-copyable by deleting the copy constructor/assignment
 // operators.
@@ -28,6 +28,6 @@ class NonCopyable {
   NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
-}  // namespace afc
+}  // namespace au
 
-#endif  // APRS_FILE_COPY_UTIL_NON_COPYABLE_H_
+#endif  // APRS_UTILS_UTIL_NON_COPYABLE_H_

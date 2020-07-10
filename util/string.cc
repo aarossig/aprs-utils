@@ -28,7 +28,7 @@ extern "C" {
 
 #include "util/log.h"
 
-namespace afc {
+namespace au {
 
 bool StringStartsWith(const std::string& string, const std::string& prefix) {
   return string.substr(0, prefix.size()) == prefix;
@@ -102,4 +102,4 @@ std::string StringBase64Decode(const std::string& str) {
   return output;
 }
 
-}  // namespace afc
+}  // namespace au

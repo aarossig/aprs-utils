@@ -23,7 +23,7 @@
 
 #include "unistd.h"
 
-namespace afc {
+namespace au {
 
 FileSender::FileSender(const std::string& filename,
     const std::string& tnc_hostname, uint16_t tnc_port)
@@ -43,4 +43,4 @@ bool FileSender::Send() {
   return true;
 }
 
-}  // namespace afc
+}  // namespace au

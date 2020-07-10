@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_UTIL_LOG_H_
-#define APRS_FILE_COPY_UTIL_LOG_H_
+#ifndef APRS_UTILS_UTIL_LOG_H_
+#define APRS_UTILS_UTIL_LOG_H_
 
 #include <cstdio>
 
@@ -37,4 +37,4 @@
     exit(-1); \
   } while (0)
 
-#endif  // APRS_FILE_COPY_UTIL_LOG_H_
+#endif  // APRS_UTILS_UTIL_LOG_H_

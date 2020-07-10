@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_UTIL_FILE_H_
-#define APRS_FILE_COPY_UTIL_FILE_H_
+#ifndef APRS_UTILS_UTIL_FILE_H_
+#define APRS_UTILS_UTIL_FILE_H_
 
 #include <string>
 
-namespace afc {
+namespace au {
 
 // Read the contents of the supplied file into a string.
 // Returns true if successful, false otherwise.
@@ -36,6 +36,6 @@ bool WriteBufferToFile(const std::string& filename,
     const uint8_t* buffer, size_t size, int mode = 0600,
     bool fail_if_exists = false);
 
-}  // namespace afc
+}  // namespace au
 
-#endif  // APRS_FILE_COPY_UTIL_FILE_H_
+#endif  // APRS_UTILS_UTIL_FILE_H_

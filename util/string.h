@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_UTIL_STRING_H_
-#define APRS_FILE_COPY_UTIL_STRING_H_
+#ifndef APRS_UTILS_UTIL_STRING_H_
+#define APRS_UTILS_UTIL_STRING_H_
 
 #include <string>
 #include <vector>
 
-namespace afc {
+namespace au {
 
 // Returns true if the supplied string starts with another.
 bool StringStartsWith(const std::string& string, const std::string& prefix);
@@ -43,6 +43,6 @@ std::string StringBase64Encode(const std::string& str);
 // Decodes the supplied string from base64.
 std::string StringBase64Decode(const std::string&str);
 
-}  // namespace afc
+}  // namespace au
 
-#endif  // APRS_FILE_COPY_UTIL_STRING_H_
+#endif  // APRS_UTILS_UTIL_STRING_H_

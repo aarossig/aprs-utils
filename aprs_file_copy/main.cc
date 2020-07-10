@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 
   int return_code = 0;
   if (!send_file_arg.getValue().empty()) {
-    afc::FileSender file_sender(send_file_arg.getValue(),
+    au::FileSender file_sender(send_file_arg.getValue(),
         tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
     if (!file_sender.Send()) {
       return_code = -1;

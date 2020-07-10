@@ -18,7 +18,7 @@
 
 #include "util/log.h"
 
-namespace afc {
+namespace au {
 
 TNCConnection::TNCConnection(const std::string& hostname, uint16_t port) {
   IPaddress ip;
@@ -39,7 +39,7 @@ TNCConnection::~TNCConnection() {
 bool TNCConnection::SendFrame(const std::string& information,
     const CallsignConfig& source,
     const std::vector<CallsignConfig>& digipeaters) {
-  constexpr char kExperimentalCallsign = "APZ200";
+  constexpr char kExperimentalCallsign[] = "APZ200";
   if (digipeaters.size() > 8) {
     LOGFATAL("Too many digipeaters specified");
   }
@@ -110,4 +110,4 @@ std::string TNCConnection::EncodeKISSFrame(const std::string& hdlc_frame) {
   return kiss_frame;
 }
 
-}  // namespace afc
+}  // namespace au

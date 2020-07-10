@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_TNC_CONNECTION_H_
-#define APRS_FILE_COPY_TNC_CONNECTION_H_
+#ifndef APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_
+#define APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_
 
 #include <string>
 #include <vector>
@@ -24,7 +24,7 @@
 
 #include "util/non_copyable.h"
 
-namespace afc {
+namespace au {
 
 // A connection to a TNC for sending/receiving frames.
 class TNCConnection : public NonCopyable {
@@ -58,6 +58,6 @@ class TNCConnection : public NonCopyable {
   std::string EncodeKISSFrame(const std::string& hdlc_frame);
 };
 
-}  // namespace afc
+}  // namespace au
 
-#endif  // APRS_FILE_COPY_TNC_CONNECTION_H_
+#endif  // APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_

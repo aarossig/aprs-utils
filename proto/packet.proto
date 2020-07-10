@@ -2,6 +2,8 @@
  * Packet protos for sending data over APRS.
  */
 
+syntax = "proto2";
+
 /* Transport ******************************************************************/
 
 // A packet that is to be sent over APRS. This should not exceed the maximum

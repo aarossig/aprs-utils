@@ -23,7 +23,7 @@
 
 #include "util/log.h"
 
-namespace afc {
+namespace au {
 
 bool ReadFileToString(const std::string& filename, std::string* contents) {
   std::ifstream in(filename, std::ios::in | std::ios::binary);
@@ -77,4 +77,4 @@ bool WriteBufferToFile(const std::string& filename,
   return success;
 }
 
-}  // namespace afc
+}  // namespace au
