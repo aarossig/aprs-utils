@@ -1,10 +1,13 @@
-# aprs-file-copy
+# aprs-utils
 
-This project contains an implementation of a chunked file transfer protocol that
-uses APRS packet radio for backhaul. This is of general interest to licensed
-Amateur Radio Operators.
+This project contains utilities for use with APRS Amateur Packet Radio.
 
-# overview
+## aprs-file-copy
+
+The aprs-file-copy tool implements a chunked file transfer protocol that
+uses APRS packet radio for backhaul.
+
+### overview
 
 This is inspired by the desire to send signed emails and small, highly
 compressed images over the exsiting APRS infrastructure. Emails that are signed
@@ -13,9 +16,9 @@ Images can be heavily compressed with modern compression algorithms such as WebP
 to produce images that are visually interesting with file sizes that are as
 small as 1-5kB.
 
-# operating considerations
+### operating considerations
 
-The goal of this project is to transmit small (1-10k) files over the APRS
+The purpose of this tool is to transmit small (1-10k) files over the APRS
 network without distrupting other users. This means very slow transfers of very
 small files. The effective data rate will end up being in the neighborhood of
 1-10 bytes/sec (less than 10% of APRS total available bandwidth). This gives an
