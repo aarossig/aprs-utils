@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef APRS_FILE_COPY_APRS_FILE_COPY_SENDER_H_
-#define APRS_FILE_COPY_APRS_FILE_COPY_SENDER_H_
+#ifndef APRS_FILE_COPY_FILE_SENDER_H_
+#define APRS_FILE_COPY_FILE_SENDER_H_
 
 #include <string>
 
-#include <SDL_net.h>
-
+#include "aprs_file_copy/tnc_connection.h"
 #include "util/non_copyable.h"
 
 namespace afc {
@@ -32,9 +31,6 @@ class FileSender : public NonCopyable {
   FileSender(const std::string& filename, const std::string& tnc_hostname,
       uint16_t tnc_port);
 
-  // Teardown any resources associated with the file sender.
-  ~FileSender();
-
   // Sends the file to the file, returning true if successful. Status is logged.
   bool Send();
 
@@ -42,10 +38,10 @@ class FileSender : public NonCopyable {
   // The contents of the file that are being sent.
   std::string file_contents_;
 
-  // The TCP socket used to communicate with the terminal node controller (TNC).
-  TCPsocket tnc_socket_;
+  // The connection to the TNC.
+  TNCConnection tnc_connection_;
 };
 
 }  // namespace afc
 
-#endif  // APRS_FILE_COPY_APRS_FILE_COPY_SENDER_H_
+#endif  // APRS_FILE_COPY_FILE_SENDER_H_

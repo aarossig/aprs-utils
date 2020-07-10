@@ -20,42 +20,25 @@
 
 #include "util/file.h"
 #include "util/log.h"
-#include "util/string.h"
 
 #include "unistd.h"
 
 namespace afc {
 
 FileSender::FileSender(const std::string& filename,
-    const std::string& tnc_hostname, uint16_t tnc_port) {
+    const std::string& tnc_hostname, uint16_t tnc_port)
+    : tnc_connection_(tnc_hostname, tnc_port) {
   if (!ReadFileToString(filename, &file_contents_)) {
     LOGFATAL("FileSender: failed to read file: %s (%d)",
         strerror(errno), errno);
   }
 
-  IPaddress ip;
-  if (SDLNet_ResolveHost(&ip, tnc_hostname.c_str(), tnc_port) < -1) {
-    LOGFATAL("FileSender: failed to resolve TNC host: %s", SDLNet_GetError());
-  }
-
-  tnc_socket_ = SDLNet_TCP_Open(&ip);
-  if (!tnc_socket_) {
-    LOGFATAL("FileSender: failed to open TNC socket: %s", SDLNet_GetError());
-  }
-
   LOGI("Ready to send file '%s'", filename.c_str());
 }
 
-FileSender::~FileSender() {
-  SDLNet_TCP_Close(tnc_socket_);
-}
-
 bool FileSender::Send() {
-  auto packet = StringFormat(
-      "\xc0%cKN6FVU>APX216,WIDE2-2:=3724.69N/12150.80Wx\xc0", '\0');
-  LOGI("packet size %zu", packet.size());
-  SDLNet_TCP_Send(tnc_socket_, packet.data(), packet.length());
-  usleep(1000000);
+  tnc_connection_.SendFrame("{testing",
+      {"KN6FVU", 0}, {{"WIDE2", 2}});
 
   return true;
 }

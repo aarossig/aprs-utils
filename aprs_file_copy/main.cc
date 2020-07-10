@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
 
   // Command line flags.
   TCLAP::CmdLine cmd(kDescription, ' ', kVersion);
-  TCLAP::ValueArg<std::string> send_file_arg("s", "send_file",
+  TCLAP::ValueArg<std::string> send_file_arg("s", "send",
       "The file to send.", false, "", "path", cmd);
-  TCLAP::SwitchArg receive_files_arg("r", "receive_files",
+  TCLAP::SwitchArg receive_files_arg("r", "receive",
       "Set to true to receive files sent by the network.", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
       "The hostname of the TNC to connect to.", false, "localhost", "hostname",

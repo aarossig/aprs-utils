@@ -1,0 +1,72 @@
+/*
+ * Packet protos for sending data over APRS.
+ */
+
+/* Transport ******************************************************************/
+
+// A packet that is to be sent over APRS. This should not exceed the maximum
+// allowable packet size on APRS (64-100 bytes typical).
+message PacketChunk {
+  // The id of the payload that is being sent. This will be the same for all
+  // packet chunks of a given payload.
+  optional uint32 payload_id = 1;
+
+  // The id of this packet chunk for acknowledgement generation. These must be
+  // monotonically increasing, starting at 1.
+  optional uint32 chunk_id = 2;
+
+  // The total size of the payload to let the receiver know when it can expect
+  // to have received all chunks. This is only sent with the first chunk.
+  optional uint32 total_payload_size = 3;
+
+  // The contents of this packet. This will contain a portion of a serialized
+  // 'Packet' proto to allow sending larger messages as separate packet chunks.
+  // These should be concatenated together until the `chunk_count` chunks have
+  // been received.
+  optional bytes payload = 4;
+};
+
+// The acknowledgement of a packet chunk sent back by a receiver.
+message PacketChunkAck {
+  // The payload id that this acknowledgement refers to.
+  optional uint32 payload_id = 2;
+
+  // The id of the chunk that is being acknowledged.
+  optional uint32 chunk_id = 1;
+};
+
+/* Application ****************************************************************/
+
+// A packet that can be sent by a node.
+message Packet {
+  // The header for a file transfer. This lets the receiver setup a file and
+  // display progress regarding the current transfer.
+  message FileTransferHeader {
+    // The name of the file to be transferred.
+    optional string filename = 1;
+
+    // The total size of the file. This allows the receiver to know when it
+    // has received the entire file.
+    optional uint32 size = 2;
+
+    // The transfer id for this file. This is referenced in the
+    // FileTransferChunk and will be the same for all chunks.
+    optional uint32 id = 3;
+  };
+
+  // A chunk of a file that is being transferred. Files can be chunked up to
+  // allow incremental use, but can also be sent as one large packet.
+  message FileTransferChunk {
+    // The transfer id for this file transfer chunk.
+    optional uint32 id = 1;
+
+    // The chunk of a file. These are sent sequentially and appended by the
+    // receiver until the complete file is received.
+    optional bytes chunk = 3;
+  }
+
+  oneof type {
+    FileTransferHeader file_transfer_header = 1;
+    FileTransferChunk file_transfer_chunk = 2;
+  }
+}

@@ -9,6 +9,7 @@
 add_executable(aprs-file-copy
   file_sender.cc
   main.cc
+  tnc_connection.cc
 )
 
 target_link_libraries(aprs-file-copy
