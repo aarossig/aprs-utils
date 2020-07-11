@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
       "specified, the program will accept all files and send to all nodes. "
       "This is useful for broadcasting a file.", false, "",
       "callsign", cmd);
+  TCLAP::SwitchArg use_aprs_is_arg("", "use_aprs_is",
+      "Set to true to use the APRS-IS network to receive files.", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
       "The hostname of the TNC to connect to.", false, "localhost",
       "hostname", cmd);
@@ -58,6 +60,10 @@ int main(int argc, char** argv) {
 
   int return_code = 0;
   if (!send_file_arg.getValue().empty()) {
+    if (use_aprs_is_arg.getValue()) {
+      LOGFATAL("unable to use APRS-IS to send files");
+    }
+
     au::FileSender file_sender(send_file_arg.getValue(),
         tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
     if (!file_sender.Send()) {
