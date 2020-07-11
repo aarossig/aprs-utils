@@ -29,7 +29,7 @@ class InternetAPRSInterface : public APRSInterface,
  public:
   // Setup the internet interface with hostname and port to connect to.
   InternetAPRSInterface(const APRSInterface::Config& config,
-      const APRSInterface::CallsignConfig& callsign,
+      const CallsignConfig& callsign,
       const std::string& hostname, uint16_t port);
 
   // Close the connection.
@@ -38,8 +38,7 @@ class InternetAPRSInterface : public APRSInterface,
  protected:
   // APRSInterface implementation.
   bool Send(const std::string& payload,
-      const CallsignConfig& source,
-      const CallsignConfig& destination,
+      const CallsignConfig& source, const CallsignConfig& destination,
       const std::vector<CallsignConfig>& digipeaters) final;
   bool Receive(CallsignConfig* source, CallsignConfig* destination,
       std::vector<CallsignConfig>* digipeaters, std::string* payload,
@@ -56,7 +55,7 @@ class InternetAPRSInterface : public APRSInterface,
   bool ReadServerVersion(std::string* server_version);
 
   // Sends the authentication command.
-  bool Authenticate(const APRSInterface::CallsignConfig& callsign);
+  bool Authenticate(const CallsignConfig& callsign);
 
   // Reads a line from the APRS-IS server. Returns true if successful and
   // populates the line.

@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
   if (use_aprs_is_arg.getValue()) {
     aprs_interface = std::make_unique<au::InternetAPRSInterface>(
         aprs_config,
-        au::APRSInterface::CallsignConfig({aprs_is_callsign_arg.getValue(), 0}),
+        au::CallsignConfig({aprs_is_callsign_arg.getValue(), 0}),
         aprs_is_hostname_arg.getValue(), aprs_is_port_arg.getValue());
   } else {
     aprs_interface = std::make_unique<au::TNCAPRSInterface>(

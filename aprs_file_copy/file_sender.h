@@ -36,9 +36,8 @@ class FileSender : public NonCopyable {
 
   // Sends the file to the file, returning true if successful. Status is logged.
   bool Send(const std::string& filename, size_t max_chunk_size,
-      const APRSInterface::CallsignConfig& callsign,
-      const APRSInterface::CallsignConfig& peer_callsign,
-      const std::vector<APRSInterface::CallsignConfig>& digipeaters);
+      const CallsignConfig& callsign, const CallsignConfig& peer_callsign,
+      const std::vector<CallsignConfig>& digipeaters);
 
  private:
   // The interface to send/receive APRS packets over.
@@ -55,8 +54,8 @@ class FileSender : public NonCopyable {
   // receiver listens there.
   bool SendBroadcast(const Packet::FileTransferHeader& header,
       const std::vector<Packet::FileTransferChunk>& chunks,
-      const APRSInterface::CallsignConfig& callsign,
-      const std::vector<APRSInterface::CallsignConfig>& digipeaters);
+      const CallsignConfig& callsign,
+      const std::vector<CallsignConfig>& digipeaters);
 
   // Returns the next transfer id.
   uint32_t GetNextTransferId();

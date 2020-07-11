@@ -33,9 +33,8 @@ FileSender::FileSender(APRSInterface* aprs_interface, size_t retransmit_count)
       next_transfer_id_(0) {}
 
 bool FileSender::Send(const std::string& filename, size_t max_chunk_size,
-    const APRSInterface::CallsignConfig& callsign,
-    const APRSInterface::CallsignConfig& peer_callsign,
-    const std::vector<APRSInterface::CallsignConfig>& digipeaters) {
+    const CallsignConfig& callsign, const CallsignConfig& peer_callsign,
+    const std::vector<CallsignConfig>& digipeaters) {
   std::string transfer_filename =
       boost::filesystem::path(filename).filename().string();
   std::string file_contents;
@@ -78,8 +77,8 @@ bool FileSender::Send(const std::string& filename, size_t max_chunk_size,
 bool FileSender::SendBroadcast(
     const Packet::FileTransferHeader& header,
     const std::vector<Packet::FileTransferChunk>& chunks,
-    const APRSInterface::CallsignConfig& callsign,
-    const std::vector<APRSInterface::CallsignConfig>& digipeaters) {
+    const CallsignConfig& callsign,
+    const std::vector<CallsignConfig>& digipeaters) {
   for (size_t transmission = 1; transmission <= retransmit_count_;
       transmission++) {
     LOGI("sending file '%s', transmission %zu",

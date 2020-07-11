@@ -28,16 +28,21 @@ FileReceiver::FileReceiver(APRSInterface* aprs_interface)
 
 bool FileReceiver::Receive(const std::string& callsign,
     const std::string& peer_callsign) {
-  APRSInterface::CallsignConfig source;
-  APRSInterface::CallsignConfig destination;
-  std::vector<APRSInterface::CallsignConfig> digipeaters;
-  std::string payload;
-
   while (true) {
+    CallsignConfig source;
+    CallsignConfig destination;
+    std::vector<CallsignConfig> digipeaters;
+    std::string payload;
+
     if (!aprs_interface_->Receive(&source, &destination,
           &digipeaters, &payload, /*timeout_ms=*/0)) {
       LOGE("failed to receive");
     }
+
+    LOGI("source callsign: '%s'", source.ToString().c_str());
+    LOGI("destination callsign: '%s'", destination.ToString().c_str());
+    LOGI("payload: '%s'", payload.c_str());
+    LOGI("");
   }
 
   return true;

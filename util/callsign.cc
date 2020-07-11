@@ -16,10 +16,32 @@
 
 #include "util/callsign.h"
 
+#include "util/string.h"
+
 namespace au {
 
 // TODO(aarossig): This is currently an experimental callsign. Consider
 // requesting another if this tool gains traction.
 const char* kBroadcastCallsign = "APZ222";
+
+bool CallsignConfig::FromString(const std::string& str) {
+  auto dash_pos = str.find('-');
+  if (dash_pos == std::string::npos) {
+    callsign = str;
+  } else {
+    callsign = str.substr(0, dash_pos);
+    // TODO(aarossig): parse the SSID.
+  }
+
+  return true;
+}
+
+std::string CallsignConfig::ToString() const {
+  if (ssid > 0) {
+    return StringFormat("%s-%d", callsign.c_str(), ssid);
+  } else {
+    return callsign;
+  }
+}
 
 }  // namespace au

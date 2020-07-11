@@ -17,11 +17,28 @@
 #ifndef APRS_UTILS_UTIL_CALLSIGN_H_
 #define APRS_UTILS_UTIL_CALLSIGN_H_
 
+#include <string>
+
 // Utils for handling callsigns.
 
 namespace au {
 
 extern const char* kBroadcastCallsign;
+
+// A config for a callsign and ssid.
+struct CallsignConfig {
+  std::string callsign;
+  int ssid = 0;
+
+  // Attempts to parse a callsign into this config from a string.
+  bool FromString(const std::string& str);
+
+  // Formats this callsign into a string.
+  std::string ToString() const;
+
+  // Returns true if the callsign config is empty.
+  bool IsEmpty() const { return callsign.empty(); }
+};
 
 }  // namespace au
 

@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "proto/packet.pb.h"
+#include "util/callsign.h"
 
 namespace au {
 
@@ -43,15 +44,6 @@ class APRSInterface {
   APRSInterface(const Config& config);
 
   virtual ~APRSInterface() = default;
-
-  // A config for a callsign and ssid.
-  struct CallsignConfig {
-    std::string callsign;
-    int ssid = 0;
-
-    // Returns true if the callsign config is empty.
-    bool IsEmpty() const { return callsign.empty(); }
-  };
 
   // Sends a packet in ACKless mode.
   bool SendBroadcastPacket(const Packet& packet,

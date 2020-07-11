@@ -26,7 +26,7 @@ namespace au {
 
 InternetAPRSInterface::InternetAPRSInterface(
     const APRSInterface::Config& config,
-    const APRSInterface::CallsignConfig& callsign,
+    const CallsignConfig& callsign,
     const std::string& hostname, uint16_t port)
     : APRSInterface(config) {
   IPaddress ip;
@@ -71,8 +71,7 @@ InternetAPRSInterface::~InternetAPRSInterface() {
 }
 
 bool InternetAPRSInterface::Send(const std::string& payload,
-    const CallsignConfig& source,
-    const CallsignConfig& destination,
+    const CallsignConfig& source, const CallsignConfig& destination,
     const std::vector<CallsignConfig>& digipeaters) {
   LOGE("sending via the internet is not supported");
   return false;
@@ -88,9 +87,44 @@ bool InternetAPRSInterface::Receive(
     return false;
   }
 
-  // TODO: parse the packet.
+  auto separator_pos = packet.find('>');
+  if (separator_pos == std::string::npos) {
+    LOGE("packet missing source/destination separator: '%s'",
+        StringFormatNonPrintables(packet).c_str());
+    return false;
+  }
 
-  LOGI("received '%s'", StringFormatNonPrintables(packet).c_str());
+  if (!source->FromString(packet.substr(0, separator_pos))) {
+    LOGE("failed to parse source callsign: '%s'",
+        StringFormatNonPrintables(packet).c_str());
+    return false;
+  }
+
+  auto comma_pos = packet.find(',', separator_pos);
+  if (comma_pos == std::string::npos) {
+    LOGE("packet missing destination separator: '%s'",
+        StringFormatNonPrintables(packet).c_str());
+    return false;
+  }
+
+  separator_pos++;
+  if (!destination->FromString(
+        packet.substr(separator_pos, comma_pos - separator_pos))) {
+    LOGE("failed to parse destination callsign: '%s'",
+        StringFormatNonPrintables(packet).c_str());
+    return false;
+  }
+
+  // TODO(aarossig): parse digipeaters.
+
+  auto payload_pos = packet.find(':');
+  if (payload_pos == std::string::npos) {
+    LOGE("packet missing payload");
+    return false;
+  }
+
+  *payload = packet.substr(payload_pos + 1);
+  LOGI("received '%s'", packet.c_str());
   return true;
 }
 
@@ -112,7 +146,7 @@ bool InternetAPRSInterface::ReadServerVersion(std::string* server_version) {
 }
 
 bool InternetAPRSInterface::Authenticate(
-    const APRSInterface::CallsignConfig& callsign) {
+    const CallsignConfig& callsign) {
   const std::string auth_line = "user " + callsign.callsign + " "
     + "pass -1 "  // Authenticate with -1 as we don't send packets currently.
     + "vers watch 0.0.1";
