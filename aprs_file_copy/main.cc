@@ -18,6 +18,7 @@
 #include <tclap/CmdLine.h>
 
 #include "aprs_file_copy/file_sender.h"
+#include "aprs_file_copy/file_receiver.h"
 #include "util/log.h"
 
 // A description of the program.
@@ -36,14 +37,17 @@ int main(int argc, char** argv) {
   // Command line flags.
   TCLAP::CmdLine cmd(kDescription, ' ', kVersion);
   TCLAP::ValueArg<std::string> send_file_arg("s", "send",
-      "The file to send.", false, "", "path", cmd);
-  TCLAP::SwitchArg receive_files_arg("r", "receive",
-      "Set to true to receive files sent by the network.", cmd);
+      "The file to send.", false, "",
+      "path", cmd);
+  TCLAP::ValueArg<std::string> receive_file_arg("r", "receive",
+      "Set to true to receive files sent by the network.", false, "",
+      "callsign", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
-      "The hostname of the TNC to connect to.", false, "localhost", "hostname",
-      cmd);
+      "The hostname of the TNC to connect to.", false, "localhost",
+      "hostname", cmd);
   TCLAP::ValueArg<uint16_t> tnc_port_arg("", "tnc_port",
-    "The port of the TNC to connect to.", false, 8001, "port", cmd);
+    "The port of the TNC to connect to.", false, 8001,
+    "port", cmd);
   cmd.parse(argc, argv);
 
   int return_code = 0;
@@ -53,8 +57,12 @@ int main(int argc, char** argv) {
     if (!file_sender.Send()) {
       return_code = -1;
     }
-  } else if (receive_files_arg.getValue()) {
-    // TODO: setup.
+  } else if (!receive_file_arg.getValue().empty()) {
+    au::FileReceiver file_receiver(tnc_hostname_arg.getValue(),
+        tnc_port_arg.getValue());
+    if (!file_receiver.Receive(receive_file_arg.getValue())) {
+      return_code = -1;
+    }
   } else {
     LOGE("Must specify whether to send or receive");
     return_code = -1;

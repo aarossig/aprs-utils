@@ -16,6 +16,7 @@
 
 #include "util/string.h"
 
+#include <cctype>
 #include <cstdarg>
 #include <regex>
 
@@ -53,8 +54,9 @@ std::string StringReplace(const std::string& str,
 }
 
 std::string StringFormat(const char* format, ...) {
-  va_list vl;
+  va_list vl, vl_copy;
   va_start(vl, format);
+  va_copy(vl_copy, vl);
 
   int size = vsnprintf(nullptr, 0, format, vl);
   if (size < 0) {
@@ -62,11 +64,12 @@ std::string StringFormat(const char* format, ...) {
   }
 
   std::string output = std::string(size + 1, '\0');
-  size = vsnprintf(output.data(), output.size(), format, vl);
+  size = vsnprintf(output.data(), output.size(), format, vl_copy);
   if (size < 0) {
     LOGFATAL("StringFormat: failed to format output");
   }
 
+  va_end(vl_copy);
   va_end(vl);
   return output;
 }
@@ -100,6 +103,20 @@ std::string StringBase64Decode(const std::string& str) {
       &decodestate);
   output.resize(size);
   return output;
+}
+
+std::string StringFormatNonPrintables(const std::string& str) {
+  std::string printable;
+  for (size_t i = 0; i < str.size(); i++) {
+    char c = str[i];
+    if (isprint(c)) {
+      printable += c;
+    } else {
+      printable += StringFormat("<0x%02x>", static_cast<uint8_t>(c));
+    }
+  }
+
+  return printable;
 }
 
 }  // namespace au

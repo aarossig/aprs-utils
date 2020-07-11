@@ -41,7 +41,11 @@ std::string StringFormat(const char* format, ...);
 std::string StringBase64Encode(const std::string& str);
 
 // Decodes the supplied string from base64.
-std::string StringBase64Decode(const std::string&str);
+std::string StringBase64Decode(const std::string& str);
+
+// Formats the supplied string into a friendly "non-printable" format for
+// characters that are not printable.
+std::string StringFormatNonPrintables(const std::string& str);
 
 }  // namespace au
 

@@ -7,6 +7,7 @@
 # aprs-file-copy ###############################################################
 
 add_executable(aprs-file-copy
+  file_receiver.cc
   file_sender.cc
   main.cc
   tnc_connection.cc

@@ -10,6 +10,7 @@ add_library(util
   file.cc
   log.h
   string.cc
+  time.cc
 )
 
 target_link_libraries(util

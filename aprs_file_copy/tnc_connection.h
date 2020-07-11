@@ -42,20 +42,39 @@ class TNCConnection : public NonCopyable {
   };
 
   // Sends a frame to the TNC.
-  bool SendFrame(const std::string& information,
+  bool SendFrame(const std::string& payload,
       const CallsignConfig& source,
       const std::vector<CallsignConfig>& digipeaters);
+
+  // Receives a frame from the TNC. Filters for the sender callsign and
+  // sends ACKs using the source call sign. If timeout is 0, the function will
+  // not timeout.
+  bool ReceiveFrame(const CallsignConfig& source, uint32_t timeout_ms,
+      std::string* payload);
 
  private:
   // The TCP socket used to communicate with the terminal node controller (TNC).
   TCPsocket tnc_socket_;
 
+  // The SocketSet used to implement timeouts for receive.
+  SDLNet_SocketSet socket_set_;
+
   // Encodes an AX.25 formatted callsign.
   std::string EncodeAX25Callsign(const CallsignConfig& config,
       bool last = false);
 
+  // Decodes an AX25 callsign from the supplied string at the supplied offset.
+  // Returns the location of the next callsign if one is found. If this returns
+  // 0, then there was a failure to decode and the frame may be invalid.
+  size_t DecodeAX25Callsign(const std::string& frame, size_t offset,
+      CallsignConfig* config, bool* last);
+
   // Encodes a KISS TNC frame.
   std::string EncodeKISSFrame(const std::string& hdlc_frame);
+
+  // Decodes a KISS TNC frame, or returns an empty string if there is a
+  // timeout.
+  std::string DecodeKISSFrame(uint32_t timeout_ms);
 };
 
 }  // namespace au
