@@ -41,8 +41,12 @@ int main(int argc, char** argv) {
   TCLAP::ValueArg<std::string> send_file_arg("s", "send",
       "The file to send.", false, "",
       "path", cmd);
-  TCLAP::ValueArg<std::string> receive_file_arg("r", "receive",
-      "Set to true to receive files sent by the network.", false, "",
+  TCLAP::SwitchArg receive_arg("r", "receive",
+      "Set to true to receive files sent by the network.", cmd);
+  TCLAP::ValueArg<std::string> callsign_arg("c", "callsign",
+      "The callsign to send a file to or receive a file from. If not "
+      "specified, the program will accept all files and send to all nodes. "
+      "This is useful for broadcasting a file.", false, "",
       "callsign", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
       "The hostname of the TNC to connect to.", false, "localhost",
@@ -59,10 +63,10 @@ int main(int argc, char** argv) {
     if (!file_sender.Send()) {
       return_code = -1;
     }
-  } else if (!receive_file_arg.getValue().empty()) {
+  } else if (!receive_arg.getValue()) {
     au::FileReceiver file_receiver(tnc_hostname_arg.getValue(),
         tnc_port_arg.getValue());
-    if (!file_receiver.Receive(receive_file_arg.getValue())) {
+    if (!file_receiver.Receive(callsign_arg.getValue())) {
       return_code = -1;
     }
   } else {
