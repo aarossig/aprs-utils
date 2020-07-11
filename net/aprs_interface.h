@@ -30,15 +30,11 @@ class APRSInterface {
   // The configuration for this APRSInterface.
   struct Config {
     float transmit_interval_s;
-    size_t retransmit_count;
     size_t max_packet_size;
   };
 
   // The interval in seconds between transmissions.
   static constexpr float kDefaultTransmitIntervalS = 10.0f;
-
-  // The number of times to retransmit packets when running in ACKless mode.
-  static constexpr size_t kDefaultRetransmitCount = 3;
 
   // The maximum number of bytes that can be sent at a time.
   static constexpr size_t kDefaultMaxPacketSize = 100;
