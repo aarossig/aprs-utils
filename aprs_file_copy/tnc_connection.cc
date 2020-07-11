@@ -22,12 +22,6 @@
 #define LOG_TAG "TNCConnection"
 
 namespace au {
-namespace {
-
-// The callsign of this app.
-constexpr char kAppCallsign[] = "APZ200";
-
-}  // namespace
 
 TNCConnection::TNCConnection(const std::string& hostname, uint16_t port) {
   IPaddress ip;
@@ -62,6 +56,7 @@ TNCConnection::~TNCConnection() {
 
 bool TNCConnection::SendFrame(const std::string& payload,
     const CallsignConfig& source,
+    const CallsignConfig& destination,
     const std::vector<CallsignConfig>& digipeaters) {
   if (digipeaters.size() > 8) {
     LOGFATAL("too many digipeaters specified");
@@ -69,7 +64,7 @@ bool TNCConnection::SendFrame(const std::string& payload,
 
   // Encode addresses.
   std::string ax25_addresses;
-  ax25_addresses += EncodeAX25Callsign({kAppCallsign, 0});
+  ax25_addresses += EncodeAX25Callsign(destination);
   ax25_addresses += EncodeAX25Callsign(source, /*last=*/digipeaters.empty());
   for (size_t i = 0; i < digipeaters.size(); i++) {
     ax25_addresses += EncodeAX25Callsign(digipeaters[i],
@@ -79,8 +74,8 @@ bool TNCConnection::SendFrame(const std::string& payload,
   // Build frame body.
   std::string ax25_frame;
   ax25_frame += ax25_addresses;
-  ax25_frame += "\x03";     // UI-Frame.
-  ax25_frame += "\xf0";     // No layer 3 protocol.
+  ax25_frame += "\x03"; // UI-Frame.
+  ax25_frame += "\xf0"; // No layer 3 protocol.
   ax25_frame += payload;
 
   // Format HDLC and then encapsulate in a KISS frame.
@@ -94,8 +89,9 @@ bool TNCConnection::SendFrame(const std::string& payload,
   return true;
 }
 
-bool TNCConnection::ReceiveFrame(const CallsignConfig& source,
-    uint32_t timeout_ms, std::string* payload) {
+bool TNCConnection::ReceiveFrame(CallsignConfig* source,
+    CallsignConfig* destination, std::vector<CallsignConfig>* digipeaters,
+    std::string* payload, uint32_t timeout_ms) {
   std::string frame = DecodeKISSFrame(timeout_ms);
   if (frame.empty()) {
     return false;
@@ -103,22 +99,15 @@ bool TNCConnection::ReceiveFrame(const CallsignConfig& source,
 
   size_t offset = 0;
   bool last = false;
-  CallsignConfig destination;
-  offset = DecodeAX25Callsign(frame, offset, &destination, &last);
+  offset = DecodeAX25Callsign(frame, offset, destination, &last);
   if (offset == 0) {
     return false;
   }
 
-  CallsignConfig received_source;
-  offset = DecodeAX25Callsign(frame, offset, &received_source, &last);
+  offset = DecodeAX25Callsign(frame, offset, source, &last);
   if (offset == 0) {
     return false;
   }
-
-  LOGI("destination %s-%d",
-      destination.callsign.c_str(), destination.ssid);
-  LOGI("source %s-%d",
-      received_source.callsign.c_str(), received_source.ssid);
 
   for (size_t i = 0; i < 8 && !last; i++) {
     CallsignConfig digipeater;
@@ -127,9 +116,7 @@ bool TNCConnection::ReceiveFrame(const CallsignConfig& source,
       return false;
     }
 
-    LOGI("digipeater %zu %s-%d", i, digipeater.callsign.c_str(),
-        digipeater.ssid);
-
+    digipeaters->push_back(digipeater);
     if (i == 7 && last) {
       LOGE("too many digipeaters");
       return false;

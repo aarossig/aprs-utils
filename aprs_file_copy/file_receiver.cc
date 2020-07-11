@@ -27,14 +27,6 @@ FileReceiver::FileReceiver(const std::string& tnc_hostname, uint16_t tnc_port)
     : tnc_connection_(tnc_hostname, tnc_port) {}
 
 bool FileReceiver::Receive(const std::string& source_callsign) {
-  while (1) {
-    std::string contents;
-    tnc_connection_.ReceiveFrame({"KN6FVU", 0}, 100000, &contents);
-    LOGI("contents: %s %zu", StringFormatNonPrintables(contents).c_str(),
-        contents.size());
-    LOGI("");
-  }
-
   return true;
 }
 

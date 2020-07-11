@@ -44,13 +44,15 @@ class TNCConnection : public NonCopyable {
   // Sends a frame to the TNC.
   bool SendFrame(const std::string& payload,
       const CallsignConfig& source,
+      const CallsignConfig& destination,
       const std::vector<CallsignConfig>& digipeaters);
 
   // Receives a frame from the TNC. Filters for the sender callsign and
   // sends ACKs using the source call sign. If timeout is 0, the function will
   // not timeout.
-  bool ReceiveFrame(const CallsignConfig& source, uint32_t timeout_ms,
-      std::string* payload);
+  bool ReceiveFrame(CallsignConfig* source, CallsignConfig* destination,
+      std::vector<CallsignConfig>* digipeaters, std::string* payload,
+      uint32_t timeout_ms);
 
  private:
   // The TCP socket used to communicate with the terminal node controller (TNC).

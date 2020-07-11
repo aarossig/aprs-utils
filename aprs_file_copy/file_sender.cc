@@ -39,9 +39,6 @@ FileSender::FileSender(const std::string& filename,
 }
 
 bool FileSender::Send() {
-  tnc_connection_.SendFrame("{testing",
-      {"KN6FVU", 0}, {{"WIDE2", 2}});
-
   return true;
 }
 
