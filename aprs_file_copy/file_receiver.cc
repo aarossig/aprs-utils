@@ -19,6 +19,8 @@
 #include "util/log.h"
 #include "util/string.h"
 
+#define LOG_TAG "FileReceiver"
+
 namespace au {
 
 FileReceiver::FileReceiver(const std::string& tnc_hostname, uint16_t tnc_port)
@@ -28,8 +30,7 @@ bool FileReceiver::Receive(const std::string& source_callsign) {
   while (1) {
     std::string contents;
     tnc_connection_.ReceiveFrame({"KN6FVU", 0}, 100000, &contents);
-    LOGI("Contents: %s %zu", contents.c_str(), contents.size());
-    LOGI("Contents: %s %zu", StringFormatNonPrintables(contents).c_str(),
+    LOGI("contents: %s %zu", StringFormatNonPrintables(contents).c_str(),
         contents.size());
     LOGI("");
   }

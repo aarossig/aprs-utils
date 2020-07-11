@@ -23,6 +23,8 @@
 
 #include "util/log.h"
 
+#define LOG_TAG "File"
+
 namespace au {
 
 bool ReadFileToString(const std::string& filename, std::string* contents) {

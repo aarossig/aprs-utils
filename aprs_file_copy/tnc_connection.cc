@@ -19,6 +19,8 @@
 #include "util/log.h"
 #include "util/time.h"
 
+#define LOG_TAG "TNCConnection"
+
 namespace au {
 namespace {
 
@@ -30,25 +32,25 @@ constexpr char kAppCallsign[] = "APZ200";
 TNCConnection::TNCConnection(const std::string& hostname, uint16_t port) {
   IPaddress ip;
   if (SDLNet_ResolveHost(&ip, hostname.c_str(), port) < 0) {
-    LOGFATAL("TNCConnection: failed to resolve TNC host: %s",
+    LOGFATAL("failed to resolve TNC host: %s",
         SDLNet_GetError());
   }
 
   tnc_socket_ = SDLNet_TCP_Open(&ip);
   if (!tnc_socket_) {
-    LOGFATAL("TNCConnection: failed to open TNC socket: %s",
+    LOGFATAL("failed to open TNC socket: %s",
         SDLNet_GetError());
   }
 
   // Setup the SocketSet.
   socket_set_ = SDLNet_AllocSocketSet(1);
   if (socket_set_ == nullptr) {
-    LOGFATAL("TNCConnection: failed to init SocketSet: %s",
+    LOGFATAL("failed to init SocketSet: %s",
         SDLNet_GetError());
   }
 
   if (SDLNet_TCP_AddSocket(socket_set_, tnc_socket_) < 0) {
-    LOGFATAL("TNCConnection: failed to add socket: %s",
+    LOGFATAL("failed to add socket: %s",
         SDLNet_GetError());
   }
 }
@@ -62,7 +64,7 @@ bool TNCConnection::SendFrame(const std::string& payload,
     const CallsignConfig& source,
     const std::vector<CallsignConfig>& digipeaters) {
   if (digipeaters.size() > 8) {
-    LOGFATAL("Too many digipeaters specified");
+    LOGFATAL("too many digipeaters specified");
   }
 
   // Encode addresses.
@@ -85,7 +87,7 @@ bool TNCConnection::SendFrame(const std::string& payload,
   std::string kiss_frame = EncodeKISSFrame(ax25_frame);
   if (SDLNet_TCP_Send(tnc_socket_,
         kiss_frame.data(), kiss_frame.size()) < 0) {
-    LOGE("Failed to send frame: %s", SDLNet_GetError());
+    LOGE("failed to send frame: %s", SDLNet_GetError());
     return false;
   }
 
@@ -129,20 +131,20 @@ bool TNCConnection::ReceiveFrame(const CallsignConfig& source,
         digipeater.ssid);
 
     if (i == 7 && last) {
-      LOGE("Too many digipeaters");
+      LOGE("too many digipeaters");
       return false;
     }
   }
 
   if (static_cast<uint8_t>(frame[offset]) != 0x03) {
-    LOGE("Invalid frame type: 0x%02x",
+    LOGE("invalid frame type: 0x%02x",
         static_cast<uint8_t>(frame[offset]));
     return false;
   }
 
   offset++;
   if (static_cast<uint8_t>(frame[offset]) != 0xf0) {
-    LOGE("Invalid layer 3 protocol: 0x%02x",
+    LOGE("invalid layer 3 protocol: 0x%02x",
         static_cast<uint8_t>(frame[offset]));
     return false;
   }
@@ -155,11 +157,11 @@ bool TNCConnection::ReceiveFrame(const CallsignConfig& source,
 std::string TNCConnection::EncodeAX25Callsign(
     const CallsignConfig& config, bool last) {
   if (config.ssid < 0 || config.ssid > 15) {
-    LOGFATAL("Invalid SSID: %d", config.ssid);
+    LOGFATAL("invalid SSID: %d", config.ssid);
   }
 
   if (config.callsign.length() > 6) {
-    LOGFATAL("Invalid callsign '%s'", config.callsign);
+    LOGFATAL("invalid callsign '%s'", config.callsign);
   }
 
   std::string padded_callsign = config.callsign;
@@ -178,13 +180,13 @@ size_t TNCConnection::DecodeAX25Callsign(
     const std::string& frame, size_t offset,
     CallsignConfig* config, bool* last) {
   if ((offset + 7) > frame.size()) {
-    LOGE("Unable to decode callsign with short frame");
+    LOGE("unable to decode callsign with short frame");
     return 0;
   }
 
   // Check that the SSID mask matches.
   if ((frame[offset + 6] & 0x60) != 0x60) {
-    LOGE("Unable to decode callsign with SSID mask");
+    LOGE("unable to decode callsign with SSID mask");
     return 0;
   }
 
@@ -229,18 +231,18 @@ std::string TNCConnection::DecodeKISSFrame(uint32_t timeout_ms) {
   while (true) {
     if (timeout_ms != 0 &&
         (GetTimeNowUs() - time_start_us) > timeout_ms * 1000) {
-      LOGE("Timeout reading packet");
+      LOGE("timeout reading packet");
       return std::string();
     }
 
     int check_result = SDLNet_CheckSockets(socket_set_, /*timeout_ms=*/1);
     if (check_result < 0) {
-      LOGFATAL("Failed to check sockets: %s", SDLNet_GetError());
+      LOGFATAL("failed to check sockets: %s", SDLNet_GetError());
     } else if (check_result >= 1) {
       uint8_t byte;
       int read_result = SDLNet_TCP_Recv(tnc_socket_, &byte, 1);
       if (read_result <= 0) {
-        LOGFATAL("Failed to read from TNC socket: %s", SDLNet_GetError());
+        LOGFATAL("failed to read from TNC socket: %s", SDLNet_GetError());
       } else if (byte == 0xc0) {
         if (!frame.empty()) {
           return frame;
@@ -251,14 +253,14 @@ std::string TNCConnection::DecodeKISSFrame(uint32_t timeout_ms) {
         if ((byte & 0x0f) == 0) {
           in_frame = true;
         } else {
-          LOGE("Invalid KISS command: %02x", byte);
+          LOGE("invalid KISS command: %02x", byte);
         }
 
         next_byte_is_header = false;
       } else if (in_frame) {
         if (byte == 0xdb) {
           if (in_escape) {
-            LOGE("Invalid escape sequence");
+            LOGE("invalid escape sequence");
             in_escape = false;
             frame.clear();
           } else {
@@ -271,7 +273,7 @@ std::string TNCConnection::DecodeKISSFrame(uint32_t timeout_ms) {
           } else if (byte == 0xdd) {
             frame += "\xdb";
           } else {
-            LOGE("Invalid escape sequence");
+            LOGE("invalid escape sequence");
             in_frame = false;
             frame.clear();
           }

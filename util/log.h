@@ -25,15 +25,15 @@
 
 // Informational logs.
 #define LOGI(format, ...) \
-  fprintf(stderr, format "\n", ##__VA_ARGS__)
+  fprintf(stderr, LOG_TAG ": " format "\n", ##__VA_ARGS__)
 
 // Error logs.
 #define LOGE(format, ...) \
-  fprintf(stderr, format "\n", ##__VA_ARGS__)
+  fprintf(stderr, LOG_TAG ": " format "\n", ##__VA_ARGS__)
 
 // Fatal logs.
 #define LOGFATAL(format, ...) do { \
-    fprintf(stderr, format "\n", ##__VA_ARGS__); \
+    fprintf(stderr, LOG_TAG ": " format "\n", ##__VA_ARGS__); \
     exit(-1); \
   } while (0)
 

@@ -29,6 +29,8 @@ extern "C" {
 
 #include "util/log.h"
 
+#define LOG_TAG "String"
+
 namespace au {
 
 bool StringStartsWith(const std::string& string, const std::string& prefix) {
@@ -60,13 +62,13 @@ std::string StringFormat(const char* format, ...) {
 
   int size = vsnprintf(nullptr, 0, format, vl);
   if (size < 0) {
-    LOGFATAL("StringFormat: failed to determine output size");
+    LOGFATAL("failed to determine output size");
   }
 
   std::string output = std::string(size + 1, '\0');
   size = vsnprintf(output.data(), output.size(), format, vl_copy);
   if (size < 0) {
-    LOGFATAL("StringFormat: failed to format output");
+    LOGFATAL("failed to format output");
   }
 
   va_end(vl_copy);

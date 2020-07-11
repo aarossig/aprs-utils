@@ -23,17 +23,19 @@
 
 #include "unistd.h"
 
+#define LOG_TAG "FileSender"
+
 namespace au {
 
 FileSender::FileSender(const std::string& filename,
     const std::string& tnc_hostname, uint16_t tnc_port)
     : tnc_connection_(tnc_hostname, tnc_port) {
   if (!ReadFileToString(filename, &file_contents_)) {
-    LOGFATAL("FileSender: failed to read file: %s (%d)",
+    LOGFATAL("failed to read file: %s (%d)",
         strerror(errno), errno);
   }
 
-  LOGI("Ready to send file '%s'", filename.c_str());
+  LOGI("ready to send file '%s'", filename.c_str());
 }
 
 bool FileSender::Send() {

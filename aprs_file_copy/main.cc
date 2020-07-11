@@ -21,6 +21,8 @@
 #include "aprs_file_copy/file_receiver.h"
 #include "util/log.h"
 
+#define LOG_TAG "APRSFileCopy"
+
 // A description of the program.
 constexpr char kDescription[] =
     "A file copy utility that uses APRS for backhaul.";
@@ -29,7 +31,7 @@ constexpr char kDescription[] =
 constexpr char kVersion[] = "0.0.1";
 
 int main(int argc, char** argv) {
-  LOGI("aprs-file-copy start");
+  LOGI("start");
   if (SDLNet_Init() < 0) {
     LOGFATAL("SDL_Init failed: %s", SDLNet_GetError());
   }
@@ -64,11 +66,11 @@ int main(int argc, char** argv) {
       return_code = -1;
     }
   } else {
-    LOGE("Must specify whether to send or receive");
+    LOGE("must specify whether to send or receive");
     return_code = -1;
   }
 
   SDLNet_Quit();
-  LOGI("aprs-file-copy quit");
+  LOGI("quit");
   return return_code;
 }
