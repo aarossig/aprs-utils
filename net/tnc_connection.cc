@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "aprs_file_copy/tnc_connection.h"
+#include "net/tnc_connection.h"
 
 #include "util/log.h"
 #include "util/time.h"

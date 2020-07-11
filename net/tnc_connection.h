@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_
-#define APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_
+#ifndef APRS_UTILS_NET_TNC_CONNECTION_H_
+#define APRS_UTILS_NET_TNC_CONNECTION_H_
 
 #include <string>
 #include <vector>
@@ -81,4 +81,4 @@ class TNCConnection : public NonCopyable {
 
 }  // namespace au
 
-#endif  // APRS_UTILS_APRS_FILE_COPY_TNC_CONNECTION_H_
+#endif  // APRS_UTILS_NET_TNC_CONNECTION_H_

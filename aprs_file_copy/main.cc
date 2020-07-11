@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <SDL_net.h>
 #include <tclap/CmdLine.h>
 
 #include "aprs_file_copy/file_sender.h"

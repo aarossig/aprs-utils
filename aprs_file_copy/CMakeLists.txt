@@ -10,14 +10,9 @@ add_executable(aprs-file-copy
   file_receiver.cc
   file_sender.cc
   main.cc
-  tnc_connection.cc
 )
 
 target_link_libraries(aprs-file-copy
+  net
   util
-  ${SDL_net_LIBRARIES}
-)
-
-target_include_directories(aprs-file-copy PRIVATE
-  ${SDL_net_INCLUDE_DIRS}
 )
