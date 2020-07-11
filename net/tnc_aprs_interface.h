@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef APRS_UTILS_NET_TNC_CONNECTION_H_
-#define APRS_UTILS_NET_TNC_CONNECTION_H_
+#ifndef APRS_UTILS_NET_TNC_APRS_INTERFACE_H_
+#define APRS_UTILS_NET_TNC_APRS_INTERFACE_H_
 
 #include <string>
 #include <vector>
 
 #include <SDL_net.h>
 
+#include "net/aprs_interface.h"
 #include "util/non_copyable.h"
 
 namespace au {
 
 // A connection to a TNC for sending/receiving frames.
-class TNCConnection : public NonCopyable {
+class TNCConnection : public APRSInterface,
+                      public NonCopyable {
  public:
   // Setup the connection to the TNC.
   TNCConnection(const std::string& hostname, uint16_t port);
@@ -35,24 +37,15 @@ class TNCConnection : public NonCopyable {
   // Close the connection.
   ~TNCConnection();
 
-  // A config for a callsign and ssid.
-  struct CallsignConfig {
-    std::string callsign;
-    int ssid;
-  };
-
-  // Sends a frame to the TNC.
-  bool SendFrame(const std::string& payload,
+ protected:
+  // APRSInterface implementation.
+  bool Send(const std::string& payload,
       const CallsignConfig& source,
       const CallsignConfig& destination,
-      const std::vector<CallsignConfig>& digipeaters);
-
-  // Receives a frame from the TNC. Filters for the sender callsign and
-  // sends ACKs using the source call sign. If timeout is 0, the function will
-  // not timeout.
-  bool ReceiveFrame(CallsignConfig* source, CallsignConfig* destination,
+      const std::vector<CallsignConfig>& digipeaters) final;
+  bool Receive(CallsignConfig* source, CallsignConfig* destination,
       std::vector<CallsignConfig>* digipeaters, std::string* payload,
-      uint32_t timeout_ms);
+      uint32_t timeout_ms) final;
 
  private:
   // The TCP socket used to communicate with the terminal node controller (TNC).
@@ -81,4 +74,4 @@ class TNCConnection : public NonCopyable {
 
 }  // namespace au
 
-#endif  // APRS_UTILS_NET_TNC_CONNECTION_H_
+#endif  // APRS_UTILS_NET_TNC_APRS_INTERFACE_H_

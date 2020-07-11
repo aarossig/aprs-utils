@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "net/tnc_connection.h"
+#include "net/tnc_aprs_interface.h"
 #include "util/non_copyable.h"
 
 namespace au {

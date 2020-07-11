@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "net/tnc_connection.h"
+#include "net/tnc_aprs_interface.h"
 
 #include "util/log.h"
 #include "util/time.h"
@@ -54,7 +54,7 @@ TNCConnection::~TNCConnection() {
   SDLNet_FreeSocketSet(socket_set_);
 }
 
-bool TNCConnection::SendFrame(const std::string& payload,
+bool TNCConnection::Send(const std::string& payload,
     const CallsignConfig& source,
     const CallsignConfig& destination,
     const std::vector<CallsignConfig>& digipeaters) {
@@ -89,7 +89,7 @@ bool TNCConnection::SendFrame(const std::string& payload,
   return true;
 }
 
-bool TNCConnection::ReceiveFrame(CallsignConfig* source,
+bool TNCConnection::Receive(CallsignConfig* source,
     CallsignConfig* destination, std::vector<CallsignConfig>* digipeaters,
     std::string* payload, uint32_t timeout_ms) {
   std::string frame = DecodeKISSFrame(timeout_ms);

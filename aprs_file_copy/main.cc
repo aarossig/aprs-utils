@@ -37,16 +37,12 @@ int main(int argc, char** argv) {
 
   // Command line flags.
   TCLAP::CmdLine cmd(kDescription, ' ', kVersion);
+  TCLAP::ValueArg<std::string> callsign_arg("c", "callsign",
+      "Set to the callsign of this station.", true, "", "callsign", cmd);
   TCLAP::ValueArg<std::string> send_file_arg("s", "send",
-      "The file to send.", false, "",
-      "path", cmd);
+      "The file to send.", false, "", "path", cmd);
   TCLAP::SwitchArg receive_arg("r", "receive",
       "Set to true to receive files sent by the network.", cmd);
-  TCLAP::ValueArg<std::string> callsign_arg("c", "callsign",
-      "The callsign to send a file to or receive a file from. If not "
-      "specified, the program will accept all files and send to all nodes. "
-      "This is useful for broadcasting a file.", false, "",
-      "callsign", cmd);
   TCLAP::SwitchArg use_aprs_is_arg("", "use_aprs_is",
       "Set to true to use the APRS-IS network to receive files.", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
@@ -57,26 +53,25 @@ int main(int argc, char** argv) {
     "port", cmd);
   cmd.parse(argc, argv);
 
-  int return_code = 0;
+  int return_code = -1;
   if (!send_file_arg.getValue().empty()) {
     if (use_aprs_is_arg.getValue()) {
-      LOGFATAL("unable to use APRS-IS to send files");
+      LOGE("unable to use APRS-IS to send files");
+    } else {
+      au::FileSender file_sender(send_file_arg.getValue(),
+          tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
+      if (file_sender.Send()) {
+        return_code = 0;
+      }
     }
-
-    au::FileSender file_sender(send_file_arg.getValue(),
-        tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
-    if (!file_sender.Send()) {
-      return_code = -1;
-    }
-  } else if (!receive_arg.getValue()) {
+  } else if (receive_arg.getValue()) {
     au::FileReceiver file_receiver(tnc_hostname_arg.getValue(),
         tnc_port_arg.getValue());
-    if (!file_receiver.Receive(callsign_arg.getValue())) {
-      return_code = -1;
+    if (file_receiver.Receive(callsign_arg.getValue())) {
+      return_code = 0;
     }
   } else {
     LOGE("must specify whether to send or receive");
-    return_code = -1;
   }
 
   SDLNet_Quit();

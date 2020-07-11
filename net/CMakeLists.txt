@@ -7,7 +7,7 @@
 # net ##########################################################################
 
 add_library(net
-  tnc_connection.cc
+  tnc_aprs_interface.cc
 )
 
 target_link_libraries(net
