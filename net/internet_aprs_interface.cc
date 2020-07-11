@@ -17,6 +17,7 @@
 #include "net/internet_aprs_interface.h"
 
 #include "util/log.h"
+#include "util/string.h"
 #include "util/time.h"
 
 #define LOG_TAG "InternetAPRSInterface"
@@ -25,17 +26,18 @@ namespace au {
 
 InternetAPRSInterface::InternetAPRSInterface(
     const APRSInterface::Config& config,
+    const APRSInterface::CallsignConfig& callsign,
     const std::string& hostname, uint16_t port)
     : APRSInterface(config) {
   IPaddress ip;
   if (SDLNet_ResolveHost(&ip, hostname.c_str(), port) < 0) {
-    LOGFATAL("failed to resolve TNC host: %s",
+    LOGFATAL("failed to resolve host: %s",
         SDLNet_GetError());
   }
 
   socket_ = SDLNet_TCP_Open(&ip);
   if (!socket_) {
-    LOGFATAL("failed to open TNC socket: %s",
+    LOGFATAL("failed to open socket: %s",
         SDLNet_GetError());
   }
 
@@ -49,6 +51,17 @@ InternetAPRSInterface::InternetAPRSInterface(
   if (SDLNet_TCP_AddSocket(socket_set_, socket_) < 0) {
     LOGFATAL("failed to add socket: %s",
         SDLNet_GetError());
+  }
+
+  std::string server_version;
+  if (!ReadServerVersion(&server_version)) {
+    LOGFATAL("failed to read the server version");
+  }
+
+  LOGI("Received server version: %s", StringFormatNonPrintables(
+        server_version).c_str());
+  if (!Authenticate(callsign)) {
+    LOGFATAL("failed to authenticate with the server");
   }
 }
 
@@ -69,12 +82,58 @@ bool InternetAPRSInterface::Receive(
     CallsignConfig* source, CallsignConfig* destination,
     std::vector<CallsignConfig>* digipeaters, std::string* payload,
     uint32_t timeout_ms) {
+  std::string packet;
+  if (!ReadLine(&packet, timeout_ms)) {
+    LOGE("failed to receive line");
+    return false;
+  }
+
+  // TODO: parse the packet.
+
+  LOGI("received '%s'", StringFormatNonPrintables(packet).c_str());
+  return true;
+}
+
+bool InternetAPRSInterface::ReadServerVersion(std::string* server_version) {
+  const std::string kVersionPrefix = "# ";
+
+  if (!ReadLine(server_version, /*timeout_ms=*/100)) {
+    LOGE("Failed to read server version");
+  } else if (!StringStartsWith(*server_version, kVersionPrefix)) {
+    LOGE("Received malformed server version '%s'",
+        StringFormatNonPrintables(*server_version).c_str());
+  } else {
+    *server_version = server_version->substr(kVersionPrefix.size(),
+        server_version->size()).c_str();
+    return true;
+  }
+
+  return false;
+}
+
+bool InternetAPRSInterface::Authenticate(
+    const APRSInterface::CallsignConfig& callsign) {
+  const std::string auth_line = "user " + callsign.callsign + " "
+    + "pass -1 "  // Authenticate with -1 as we don't send packets currently.
+    + "vers watch 0.0.1";
+  if (!WriteLine(auth_line)) {
+    LOGE("failed to send auth line");
+    return false;
+  }
+
+  std::string auth_response_line;
+  if (!ReadLine(&auth_response_line, /*timeout_ms=*/100)) {
+    LOGE("failed to read auth response line");
+    return false;
+  }
+
+  LOGI("server responded to auth with '%s'",
+      StringFormatNonPrintables(auth_response_line).c_str());
   return true;
 }
 
 bool InternetAPRSInterface::ReadLine(std::string* line, uint32_t timeout_ms) {
   constexpr size_t kMaxLineLength = 1024;
-  line->resize(kMaxLineLength, '\0');
 
   uint64_t time_start_us = GetTimeNowUs();
   while (true) {
@@ -95,6 +154,11 @@ bool InternetAPRSInterface::ReadLine(std::string* line, uint32_t timeout_ms) {
       }
 
       line->push_back(byte);
+      if (line->size() > kMaxLineLength) {
+        LOGE("server sent line that is too long");
+        return false;
+      }
+
       if (line->size() >= 2
           && line->at(line->size() - 2) == '\r'
           && line->at(line->size() - 1) == '\n') {
@@ -103,6 +167,17 @@ bool InternetAPRSInterface::ReadLine(std::string* line, uint32_t timeout_ms) {
       }
     }
   }
+}
+
+bool InternetAPRSInterface::WriteLine(const std::string& line) {
+  std::string send_line = line + "\r\n";
+  int write_result = SDLNet_TCP_Send(socket_,
+      send_line.data(), send_line.size());
+  if (write_result < line.size()) {
+    LOGFATAL("failed to write to socket: %s", SDLNet_GetError());
+  }
+
+  return true;
 }
 
 }  // namespace au

@@ -29,6 +29,7 @@ class InternetAPRSInterface : public APRSInterface,
  public:
   // Setup the internet interface with hostname and port to connect to.
   InternetAPRSInterface(const APRSInterface::Config& config,
+      const APRSInterface::CallsignConfig& callsign,
       const std::string& hostname, uint16_t port);
 
   // Close the connection.
@@ -51,9 +52,18 @@ class InternetAPRSInterface : public APRSInterface,
   // The SocketSet used to implement timeouts for receive.
   SDLNet_SocketSet socket_set_;
 
+  // Reads the server version. This is expected to be sent on startup.
+  bool ReadServerVersion(std::string* server_version);
+
+  // Sends the authentication command.
+  bool Authenticate(const APRSInterface::CallsignConfig& callsign);
+
   // Reads a line from the APRS-IS server. Returns true if successful and
   // populates the line.
   bool ReadLine(std::string* line, uint32_t timeout_ms);
+
+  // Writes a line to the server. Returns true if successful.
+  bool WriteLine(const std::string& line);
 };
 
 }  // namespace au
