@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-#include "aprs_file_copy/file_sender.h"
+#ifndef APRS_UTILS_UTIL_CALLSIGN_H_
+#define APRS_UTILS_UTIL_CALLSIGN_H_
 
-#include <cstring>
-
-#include "util/file.h"
-#include "util/log.h"
-
-#include "unistd.h"
-
-#define LOG_TAG "FileSender"
+// Utils for handling callsigns.
 
 namespace au {
 
-FileSender::FileSender(const std::string& filename,
-    APRSInterface* aprs_interface)
-    : aprs_interface_(aprs_interface) {
-  if (!ReadFileToString(filename, &file_contents_)) {
-    LOGFATAL("failed to read file: %s (%d)",
-        strerror(errno), errno);
-  }
-
-  LOGI("ready to send file '%s'", filename.c_str());
-}
-
-bool FileSender::Send(const std::string& callsign,
-    const std::string& peer_callsign) {
-  return true;
-}
+extern const char* kBroadcastCallsign;
 
 }  // namespace au
+
+#endif  // APRS_UTILS_UTIL_CALLSIGN_H_

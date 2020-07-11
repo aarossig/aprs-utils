@@ -7,6 +7,7 @@
 # net ##########################################################################
 
 add_library(net
+  internet_aprs_interface.cc
   tnc_aprs_interface.cc
 )
 

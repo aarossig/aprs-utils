@@ -19,11 +19,11 @@
 #include "util/log.h"
 #include "util/time.h"
 
-#define LOG_TAG "TNCConnection"
+#define LOG_TAG "TNCAPRSInterface"
 
 namespace au {
 
-TNCConnection::TNCConnection(const std::string& hostname, uint16_t port) {
+TNCAPRSInterface::TNCAPRSInterface(const std::string& hostname, uint16_t port) {
   IPaddress ip;
   if (SDLNet_ResolveHost(&ip, hostname.c_str(), port) < 0) {
     LOGFATAL("failed to resolve TNC host: %s",
@@ -49,12 +49,12 @@ TNCConnection::TNCConnection(const std::string& hostname, uint16_t port) {
   }
 }
 
-TNCConnection::~TNCConnection() {
-  SDLNet_TCP_Close(tnc_socket_);
+TNCAPRSInterface::~TNCAPRSInterface() {
   SDLNet_FreeSocketSet(socket_set_);
+  SDLNet_TCP_Close(tnc_socket_);
 }
 
-bool TNCConnection::Send(const std::string& payload,
+bool TNCAPRSInterface::Send(const std::string& payload,
     const CallsignConfig& source,
     const CallsignConfig& destination,
     const std::vector<CallsignConfig>& digipeaters) {
@@ -89,7 +89,7 @@ bool TNCConnection::Send(const std::string& payload,
   return true;
 }
 
-bool TNCConnection::Receive(CallsignConfig* source,
+bool TNCAPRSInterface::Receive(CallsignConfig* source,
     CallsignConfig* destination, std::vector<CallsignConfig>* digipeaters,
     std::string* payload, uint32_t timeout_ms) {
   std::string frame = DecodeKISSFrame(timeout_ms);
@@ -141,7 +141,7 @@ bool TNCConnection::Receive(CallsignConfig* source,
   return true;
 }
 
-std::string TNCConnection::EncodeAX25Callsign(
+std::string TNCAPRSInterface::EncodeAX25Callsign(
     const CallsignConfig& config, bool last) {
   if (config.ssid < 0 || config.ssid > 15) {
     LOGFATAL("invalid SSID: %d", config.ssid);
@@ -163,7 +163,7 @@ std::string TNCConnection::EncodeAX25Callsign(
       0x60 | (config.ssid << 1) | (last ? 0x01 : 0x00));
 }
 
-size_t TNCConnection::DecodeAX25Callsign(
+size_t TNCAPRSInterface::DecodeAX25Callsign(
     const std::string& frame, size_t offset,
     CallsignConfig* config, bool* last) {
   if ((offset + 7) > frame.size()) {
@@ -192,7 +192,7 @@ size_t TNCConnection::DecodeAX25Callsign(
   return offset + 7;
 }
 
-std::string TNCConnection::EncodeKISSFrame(const std::string& hdlc_frame) {
+std::string TNCAPRSInterface::EncodeKISSFrame(const std::string& hdlc_frame) {
   std::string kiss_frame = "\xc0";
   kiss_frame += '\0';  // Channel. TODO: Make configurable.
   for (const auto& byte : hdlc_frame) {
@@ -209,7 +209,7 @@ std::string TNCConnection::EncodeKISSFrame(const std::string& hdlc_frame) {
   return kiss_frame;
 }
 
-std::string TNCConnection::DecodeKISSFrame(uint32_t timeout_ms) {
+std::string TNCAPRSInterface::DecodeKISSFrame(uint32_t timeout_ms) {
   std::string frame;
   bool in_frame = false;
   bool in_escape = false;
@@ -217,7 +217,7 @@ std::string TNCConnection::DecodeKISSFrame(uint32_t timeout_ms) {
   uint64_t time_start_us = GetTimeNowUs();
   while (true) {
     if (timeout_ms != 0 &&
-        (GetTimeNowUs() - time_start_us) > timeout_ms * 1000) {
+        (GetTimeNowUs() - time_start_us) > (timeout_ms * 1000)) {
       LOGE("timeout reading packet");
       return std::string();
     }

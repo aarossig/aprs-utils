@@ -7,6 +7,7 @@
 # util #########################################################################
 
 add_library(util
+  callsign.cc
   file.cc
   log.h
   string.cc

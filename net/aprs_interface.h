@@ -17,6 +17,9 @@
 #ifndef APRS_UTILS_NET_APRS_INTERFACE_H_
 #define APRS_UTILS_NET_APRS_INTERFACE_H_
 
+#include <string>
+#include <vector>
+
 namespace au {
 
 // An interface to use for sending/receiving packets from a APRS.

@@ -23,10 +23,11 @@
 
 namespace au {
 
-FileReceiver::FileReceiver(const std::string& tnc_hostname, uint16_t tnc_port)
-    : tnc_connection_(tnc_hostname, tnc_port) {}
+FileReceiver::FileReceiver(APRSInterface* aprs_interface)
+    : aprs_interface_(aprs_interface) {}
 
-bool FileReceiver::Receive(const std::string& source_callsign) {
+bool FileReceiver::Receive(const std::string& callsign,
+    const std::string& peer_callsign) {
   return true;
 }
 

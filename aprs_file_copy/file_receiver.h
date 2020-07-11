@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "net/tnc_aprs_interface.h"
+#include "net/aprs_interface.h"
 #include "util/non_copyable.h"
 
 namespace au {
@@ -28,14 +28,15 @@ namespace au {
 class FileReceiver : public NonCopyable {
  public:
   // Setup the file receiver.
-  FileReceiver(const std::string& tnc_hostname, uint16_t tnc_port);
+  FileReceiver(APRSInterface* aprs_interface);
 
   // Receives a file from the supplied callsign.
-  bool Receive(const std::string& source_callsign);
+  bool Receive(const std::string& callsign,
+      const std::string& peer_callsign);
 
  private:
-  // The connection to the TNC.
-  TNCConnection tnc_connection_;
+  // The interface to send/receive APRS pakcets over.
+  APRSInterface* const aprs_interface_;
 };
 
 }  // namespace au

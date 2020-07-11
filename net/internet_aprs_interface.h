@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef APRS_UTILS_NET_TNC_APRS_INTERFACE_H_
-#define APRS_UTILS_NET_TNC_APRS_INTERFACE_H_
+#ifndef APRS_UTILS_NET_INTERNET_APRS_INTERFACE_H_
+#define APRS_UTILS_NET_INTERNET_APRS_INTERFACE_H_
 
 #include <SDL_net.h>
 
@@ -24,15 +24,14 @@
 
 namespace au {
 
-// A connection to a TNC for sending/receiving frames.
-class TNCAPRSInterface : public APRSInterface,
-                         public NonCopyable {
+class InternetAPRSInterface : public APRSInterface,
+                              public NonCopyable {
  public:
-  // Setup the connection to the TNC.
-  TNCAPRSInterface(const std::string& hostname, uint16_t port);
+  // Setup the internet interface with hostname and port to connect to.
+  InternetAPRSInterface(const std::string& hostname, uint16_t port);
 
   // Close the connection.
-  ~TNCAPRSInterface();
+  ~InternetAPRSInterface() override;
 
  protected:
   // APRSInterface implementation.
@@ -45,30 +44,17 @@ class TNCAPRSInterface : public APRSInterface,
       uint32_t timeout_ms) final;
 
  private:
-  // The TCP socket used to communicate with the terminal node controller (TNC).
-  TCPsocket tnc_socket_;
+  // The socket used to interact with the server.
+  TCPsocket socket_;
 
   // The SocketSet used to implement timeouts for receive.
   SDLNet_SocketSet socket_set_;
 
-  // Encodes an AX.25 formatted callsign.
-  std::string EncodeAX25Callsign(const CallsignConfig& config,
-      bool last = false);
-
-  // Decodes an AX25 callsign from the supplied string at the supplied offset.
-  // Returns the location of the next callsign if one is found. If this returns
-  // 0, then there was a failure to decode and the frame may be invalid.
-  size_t DecodeAX25Callsign(const std::string& frame, size_t offset,
-      CallsignConfig* config, bool* last);
-
-  // Encodes a KISS TNC frame.
-  std::string EncodeKISSFrame(const std::string& hdlc_frame);
-
-  // Decodes a KISS TNC frame, or returns an empty string if there is a
-  // timeout.
-  std::string DecodeKISSFrame(uint32_t timeout_ms);
+  // Reads a line from the APRS-IS server. Returns true if successful and
+  // populates the line.
+  bool ReadLine(std::string* line, uint32_t timeout_ms);
 };
 
 }  // namespace au
 
-#endif  // APRS_UTILS_NET_TNC_APRS_INTERFACE_H_
+#endif  // APRS_UTILS_NET_INTERNET_APRS_INTERFACE_H_
