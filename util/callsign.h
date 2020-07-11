@@ -38,6 +38,11 @@ struct CallsignConfig {
 
   // Returns true if the callsign config is empty.
   bool IsEmpty() const { return callsign.empty(); }
+
+  // Return true if two callsign configs are equal.
+  bool operator==(const CallsignConfig& other) const {
+    return callsign == other.callsign && ssid == other.ssid;
+  }
 };
 
 }  // namespace au

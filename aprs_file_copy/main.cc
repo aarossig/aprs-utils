@@ -123,8 +123,8 @@ int main(int argc, char** argv) {
     }
   } else if (receive_arg.getValue()) {
     au::FileReceiver file_receiver(aprs_interface.get());
-    if (file_receiver.Receive(callsign_arg.getValue(),
-          peer_callsign_arg.getValue())) {
+    if (file_receiver.Receive({callsign_arg.getValue(), 0},
+          {peer_callsign_arg.getValue(), 0})) {
       return_code = 0;
     }
   } else {

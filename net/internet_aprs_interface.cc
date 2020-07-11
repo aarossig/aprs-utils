@@ -82,9 +82,14 @@ bool InternetAPRSInterface::Receive(
     std::vector<CallsignConfig>* digipeaters, std::string* payload,
     uint32_t timeout_ms) {
   std::string packet;
-  if (!ReadLine(&packet, timeout_ms)) {
-    LOGE("failed to receive line");
-    return false;
+  while (packet.empty()) {
+    if (!ReadLine(&packet, timeout_ms)) {
+      LOGE("failed to receive line");
+      return false;
+    } else if (StringStartsWith(packet, "#")) {
+      LOGI("server sent informational packet: '%s", packet.c_str());
+      packet.clear();
+    }
   }
 
   auto separator_pos = packet.find('>');
@@ -124,7 +129,6 @@ bool InternetAPRSInterface::Receive(
   }
 
   *payload = packet.substr(payload_pos + 1);
-  LOGI("received '%s'", packet.c_str());
   return true;
 }
 

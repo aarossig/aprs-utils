@@ -26,8 +26,10 @@ namespace au {
 FileReceiver::FileReceiver(APRSInterface* aprs_interface)
     : aprs_interface_(aprs_interface) {}
 
-bool FileReceiver::Receive(const std::string& callsign,
-    const std::string& peer_callsign) {
+bool FileReceiver::Receive(const CallsignConfig& callsign,
+    const CallsignConfig& peer_callsign) {
+  const CallsignConfig kBroadcastDestination({kBroadcastCallsign, 0});
+
   while (true) {
     CallsignConfig source;
     CallsignConfig destination;
@@ -36,13 +38,17 @@ bool FileReceiver::Receive(const std::string& callsign,
 
     if (!aprs_interface_->Receive(&source, &destination,
           &digipeaters, &payload, /*timeout_ms=*/0)) {
-      LOGE("failed to receive");
+      continue;
     }
 
-    LOGI("source callsign: '%s'", source.ToString().c_str());
-    LOGI("destination callsign: '%s'", destination.ToString().c_str());
-    LOGI("payload: '%s'", payload.c_str());
-    LOGI("");
+    if (peer_callsign.IsEmpty() && destination == kBroadcastDestination
+        || peer_callsign == destination) {
+      LOGI("source callsign: '%s'", source.ToString().c_str());
+      LOGI("destination callsign: '%s'", destination.ToString().c_str());
+      LOGI("payload: '%s'", payload.c_str());
+      LOGI("");
+    }
+
   }
 
   return true;

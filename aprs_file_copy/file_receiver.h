@@ -31,8 +31,8 @@ class FileReceiver : public NonCopyable {
   FileReceiver(APRSInterface* aprs_interface);
 
   // Receives a file from the supplied callsign.
-  bool Receive(const std::string& callsign,
-      const std::string& peer_callsign);
+  bool Receive(const CallsignConfig& callsign,
+      const CallsignConfig& peer_callsign);
 
  private:
   // The interface to send/receive APRS pakcets over.
