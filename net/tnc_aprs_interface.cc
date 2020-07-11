@@ -23,7 +23,9 @@
 
 namespace au {
 
-TNCAPRSInterface::TNCAPRSInterface(const std::string& hostname, uint16_t port) {
+TNCAPRSInterface::TNCAPRSInterface(const APRSInterface::Config& config,
+    const std::string& hostname, uint16_t port)
+  : APRSInterface(config) {
   IPaddress ip;
   if (SDLNet_ResolveHost(&ip, hostname.c_str(), port) < 0) {
     LOGFATAL("failed to resolve TNC host: %s",

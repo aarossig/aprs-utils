@@ -28,17 +28,31 @@ namespace au {
 class FileSender : public NonCopyable {
  public:
   // Setup the file sender with the filename to send.
-  FileSender(const std::string& filename, APRSInterface* aprs_interface);
+  FileSender(APRSInterface* aprs_interface);
 
   // Sends the file to the file, returning true if successful. Status is logged.
-  bool Send(const std::string& callsign, const std::string& peer_callsign);
+  bool Send(const std::string& filename, size_t max_chunk_size,
+      const APRSInterface::CallsignConfig& callsign,
+      const APRSInterface::CallsignConfig& peer_callsign,
+      const std::vector<APRSInterface::CallsignConfig>& digipeaters);
 
  private:
-  // The contents of the file that are being sent.
-  std::string file_contents_;
-
   // The interface to send/receive APRS packets over.
   APRSInterface* const aprs_interface_;
+
+  // The next transfer ID to use when sending a file.
+  uint32_t next_transfer_id_;
+
+  // Broadcasts a file (ACKless mode). This will work with peers that are in
+  // either RF range or if the sender is within range of an I-Gate and the
+  // receiver listens there.
+  bool SendBroadcast(const Packet::FileTransferHeader& header,
+      const std::vector<Packet::FileTransferChunk>& chunks,
+      const APRSInterface::CallsignConfig& callsign,
+      const std::vector<APRSInterface::CallsignConfig>& digipeaters);
+
+  // Returns the next transfer id.
+  uint32_t GetNextTransferId();
 };
 
 }  // namespace au

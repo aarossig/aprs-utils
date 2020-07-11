@@ -17,6 +17,7 @@ project(aprs-file-copy)
 
 include(FindProtobuf)
 
+find_package(Boost COMPONENTS filesystem REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Protobuf REQUIRED)
 

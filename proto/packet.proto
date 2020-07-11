@@ -4,6 +4,8 @@
 
 syntax = "proto2";
 
+package au;
+
 /* Transport ******************************************************************/
 
 // A packet chunk that can be sent by a node, with ACKs.
@@ -18,7 +20,7 @@ message PacketChunk {
     // The id of this packet chunk for acknowledgement generation. These must
     // be monotonically increasing, starting at 1.
     optional uint32 chunk_id = 2;
-  
+ 
     // The total size of the payload to let the receiver know when it can expect
     // to have received all chunks. This is only sent with the first chunk.
     optional uint32 total_payload_size = 3;
@@ -72,7 +74,10 @@ message Packet {
 
     // The chunk of a file. These are sent sequentially and appended by the
     // receiver until the complete file is received.
-    optional bytes chunk = 3;
+    optional bytes chunk = 2;
+
+    // TODO(aarossig): consider adding chunk_gz, chunk_xz, etc to support
+    // different modes. If compression can help, we should use it.
   }
 
   oneof type {

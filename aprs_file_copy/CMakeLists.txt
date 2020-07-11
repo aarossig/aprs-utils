@@ -13,6 +13,7 @@ add_executable(aprs-file-copy
 )
 
 target_link_libraries(aprs-file-copy
+  ${Boost_FILESYSTEM_LIBRARY}
   net
   util
 )

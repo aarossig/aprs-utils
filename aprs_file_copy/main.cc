@@ -52,6 +52,22 @@ int main(int argc, char** argv) {
       "Set to true to receive files sent by the network.", cmd);
   TCLAP::SwitchArg use_aprs_is_arg("", "use_aprs_is",
       "Set to true to use the APRS-IS network to receive files.", cmd);
+  TCLAP::ValueArg<size_t> max_file_chunk_size_arg ("", "max_file_chunk_size",
+      "The size of a file chunk to transfer. Handy for formats "
+      "that support progressive encoding such as JPEG or text files. Passing "
+      "zero will not chunk the file.",
+      false, 0, "bytes", cmd);
+  TCLAP::ValueArg<float> aprs_transmit_interval_s_arg("",
+      "aprs_transmit_interval_s",
+      "The amount of time between APRS transmissions.",
+      false, au::APRSInterface::kDefaultTransmitIntervalS, "seconds", cmd);
+  TCLAP::ValueArg<size_t> aprs_retransmit_count_arg_("",
+      "aprs_retransmit_count", "The number of times to retransmit a packet "
+      "when running in ACKless mode.", false,
+      au::APRSInterface::kDefaultRetransmitCount, "count", cmd);
+  TCLAP::ValueArg<size_t> aprs_max_packet_size_arg("", "aprs_max_packet_size",
+      "The maximum size of an APRS packet to transfer.",
+      false, au::APRSInterface::kDefaultMaxPacketSize, "bytes", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
       "The hostname of the TNC to connect to.", false, "localhost",
       "hostname", cmd);
@@ -71,22 +87,29 @@ int main(int argc, char** argv) {
     LOGFATAL("unable to use APRS-IS to send files");
   }
 
+  au::APRSInterface::Config aprs_config;
+  aprs_config.transmit_interval_s = aprs_transmit_interval_s_arg.getValue();
+  aprs_config.retransmit_count = aprs_retransmit_count_arg_.getValue();
+  aprs_config.max_packet_size = aprs_max_packet_size_arg.getValue();
+
   // Setup the APRS interface.
   std::unique_ptr<au::APRSInterface> aprs_interface;
   if (use_aprs_is_arg.getValue()) {
     aprs_interface = std::make_unique<au::InternetAPRSInterface>(
-        aprs_is_hostname_arg.getValue(), aprs_is_port_arg.getValue());
+        aprs_config, aprs_is_hostname_arg.getValue(),
+        aprs_is_port_arg.getValue());
   } else {
     aprs_interface = std::make_unique<au::TNCAPRSInterface>(
-        tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
+        aprs_config, tnc_hostname_arg.getValue(), tnc_port_arg.getValue());
   }
 
   // Perform the file transger operation.
   int return_code = -1;
   if (!send_file_arg.getValue().empty()) {
-    au::FileSender file_sender(send_file_arg.getValue(), aprs_interface.get());
-    if (file_sender.Send(callsign_arg.getValue(),
-          peer_callsign_arg.getValue())) {
+    au::FileSender file_sender(aprs_interface.get());
+    if (file_sender.Send(send_file_arg.getValue(),
+          max_file_chunk_size_arg.getValue(), {callsign_arg.getValue(), 0},
+          {peer_callsign_arg.getValue(), 0}, {})) {
       return_code = 0;
     }
   } else if (receive_arg.getValue()) {

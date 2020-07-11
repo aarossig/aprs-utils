@@ -20,29 +20,76 @@
 #include <string>
 #include <vector>
 
+#include "proto/packet.pb.h"
+
 namespace au {
 
 // An interface to use for sending/receiving packets from a APRS.
 class APRSInterface {
  public:
+  // The configuration for this APRSInterface.
+  struct Config {
+    float transmit_interval_s;
+    size_t retransmit_count;
+    size_t max_packet_size;
+  };
+
+  // The interval in seconds between transmissions.
+  static constexpr float kDefaultTransmitIntervalS = 10.0f;
+
+  // The number of times to retransmit packets when running in ACKless mode.
+  static constexpr size_t kDefaultRetransmitCount = 3;
+
+  // The maximum number of bytes that can be sent at a time.
+  static constexpr size_t kDefaultMaxPacketSize = 100;
+
+  // Setup the APRSInterface.
+  APRSInterface(const Config& config);
+
   virtual ~APRSInterface() = default;
 
   // A config for a callsign and ssid.
   struct CallsignConfig {
     std::string callsign;
-    int ssid;
+    int ssid = 0;
+
+    // Returns true if the callsign config is empty.
+    bool IsEmpty() const { return callsign.empty(); }
   };
 
-  // Sends a frame over APRS.
+  // Sends a packet in ACKless mode.
+  bool SendBroadcastPacket(const Packet& packet,
+      const CallsignConfig& source,
+      const std::vector<CallsignConfig>& digipeaters);
+
+  // Sends a frame over APRS. This is a lower-level interface that is not
+  // typically used.
   virtual bool Send(const std::string& payload,
       const CallsignConfig& source,
       const CallsignConfig& destination,
       const std::vector<CallsignConfig>& digipeaters) = 0;
 
-  // Receives a frame from the APRS network.
+  // Receives a frame from the APRS network. This is a lower-level interface
+  // that is not typically used.
   virtual bool Receive(CallsignConfig* source, CallsignConfig* destination,
       std::vector<CallsignConfig>* digipeaters, std::string* payload,
       uint32_t timeout_ms) = 0;
+
+ private:
+  // The config to use for this APRSInterface.
+  const Config config_;
+
+  // The id of the next payload from this station.
+  uint32_t next_payload_id_;
+
+  // Returns the ID of the next payload to send.
+  uint32_t GetNextPayloadId();
+
+  // Sends a packet chunk by serializing to base64 and forming a valid APRS
+  // frame.
+  bool SendPacketChunk(const PacketChunk& chunk, const CallsignConfig& source,
+      const CallsignConfig& destination,
+      const std::vector<CallsignConfig>& digipeaters);
 };
 
 }  // namespace au

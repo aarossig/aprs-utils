@@ -7,11 +7,13 @@
 # net ##########################################################################
 
 add_library(net
+  aprs_interface.cc
   internet_aprs_interface.cc
   tnc_aprs_interface.cc
 )
 
 target_link_libraries(net
+  packet_proto
   util
   ${SDL_net_LIBRARIES}
 )

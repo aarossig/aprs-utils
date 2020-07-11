@@ -21,6 +21,9 @@
 
 namespace au {
 
+// The number of microseconds per second.
+constexpr uint64_t kUsPerS = 1000000;
+
 // Gets the current system time in microseconds.
 uint64_t GetTimeNowUs();
 

@@ -29,7 +29,8 @@ class TNCAPRSInterface : public APRSInterface,
                          public NonCopyable {
  public:
   // Setup the connection to the TNC.
-  TNCAPRSInterface(const std::string& hostname, uint16_t port);
+  TNCAPRSInterface(const APRSInterface::Config& config,
+      const std::string& hostname, uint16_t port);
 
   // Close the connection.
   ~TNCAPRSInterface();

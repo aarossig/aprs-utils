@@ -28,7 +28,8 @@ class InternetAPRSInterface : public APRSInterface,
                               public NonCopyable {
  public:
   // Setup the internet interface with hostname and port to connect to.
-  InternetAPRSInterface(const std::string& hostname, uint16_t port);
+  InternetAPRSInterface(const APRSInterface::Config& config,
+      const std::string& hostname, uint16_t port);
 
   // Close the connection.
   ~InternetAPRSInterface() override;
