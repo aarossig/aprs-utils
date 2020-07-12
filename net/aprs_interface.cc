@@ -45,35 +45,38 @@ bool APRSInterface::SendBroadcastPacket(const Packet& packet,
   uint32_t payload_id = GetNextPayloadId();
   LOGI("sending payload_id %zu", payload_id);
 
-  uint32_t chunk_id = 1;
   uint64_t next_packet_time_us = GetTimeNowUs();
-  for (uint32_t offset = 0; offset < serialized_packet.size();) {
-    PacketChunk packet_chunk;
-    auto* chunk = packet_chunk.mutable_chunk();
-    chunk->set_payload_id(payload_id);
-    chunk->set_chunk_id(chunk_id++);
-    if (offset == 0) {
-      chunk->set_total_payload_size(serialized_packet.size());
+  for (size_t i = 1; i <= config_.retransmit_count; i++) {
+    uint32_t chunk_id = 1;
+    for (uint32_t offset = 0; offset < serialized_packet.size();) {
+      PacketChunk packet_chunk;
+      auto* chunk = packet_chunk.mutable_chunk();
+      chunk->set_payload_id(payload_id);
+      chunk->set_chunk_id(chunk_id++);
+      chunk->set_retransmit_id(i);
+      if (offset == 0) {
+        chunk->set_total_payload_size(serialized_packet.size());
+      }
+
+      size_t chunk_size = std::min(config_.max_packet_size,
+          serialized_packet.size() - offset);
+      chunk->set_payload(serialized_packet.substr(offset, chunk_size));
+
+      if (!SendPacketChunk(packet_chunk, source, kBroadcastDestination,
+            digipeaters)) {
+        LOGE("failed to send packet chunk");
+        return false;
+      }
+
+      LOGI("sent broadcast chunk_id=%zu, offset=%zu, chunk_size=%zu, "
+          "total_size=%zu, retransmit=%zu",
+          chunk->chunk_id(), offset, chunk_size, serialized_packet.size(), i);
+      offset += chunk_size;
+
+      // Pause for the next transmission.
+      next_packet_time_us += config_.transmit_interval_s * kUsPerS;
+      SleepUntil(next_packet_time_us);
     }
-
-    size_t chunk_size = std::min(config_.max_packet_size,
-        serialized_packet.size() - offset);
-    chunk->set_payload(serialized_packet.substr(offset, chunk_size));
-
-    if (!SendPacketChunk(packet_chunk, source, kBroadcastDestination,
-          digipeaters)) {
-      LOGE("failed to send packet chunk");
-      return false;
-    }
-
-    LOGI("sent broadcast chunk_id=%zu, offset=%zu, chunk_size=%zu, "
-        "total_size=%zu", chunk->chunk_id(), offset, chunk_size,
-        serialized_packet.size());
-    offset += chunk_size;
-
-    // Pause for the next transmission.
-    next_packet_time_us += config_.transmit_interval_s * kUsPerS;
-    SleepUntil(next_packet_time_us);
   }
 
   return true;

@@ -25,12 +25,16 @@ message PacketChunk {
     // The total size of the payload to let the receiver know when it can expect
     // to have received all chunks. This is only sent with the first chunk.
     optional uint32 total_payload_size = 3;
-  
+
+ 
     // The contents of this packet. This will contain a portion of a serialized
     // 'Packet' proto to allow sending larger messages as separate packet
     // chunks. These should be concatenated together until the `chunk_count`
     // chunks have been received.
     optional bytes payload = 4;
+
+    // Set to the index of the retransmission, starting from 1.
+    optional uint32 retransmit_id = 5;
   };
   
   // The acknowledgement of a packet chunk sent back by a receiver.

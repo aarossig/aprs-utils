@@ -27,9 +27,8 @@
 
 namespace au {
 
-FileSender::FileSender(APRSInterface* aprs_interface, size_t retransmit_count)
+FileSender::FileSender(APRSInterface* aprs_interface)
     : aprs_interface_(aprs_interface),
-      retransmit_count_(retransmit_count),
       next_transfer_id_(0) {}
 
 bool FileSender::Send(const std::string& filename, size_t max_chunk_size,
@@ -81,25 +80,20 @@ bool FileSender::SendBroadcast(
     const std::vector<Packet::FileTransferChunk>& chunks,
     const CallsignConfig& callsign,
     const std::vector<CallsignConfig>& digipeaters) {
-  for (size_t transmission = 1; transmission <= retransmit_count_;
-      transmission++) {
-    LOGI("sending file '%s', transmission %zu",
-        header.filename().c_str(), transmission);
-    Packet packet;
-    *packet.mutable_file_transfer_header() = header;
-    if (!aprs_interface_->SendBroadcastPacket(packet, callsign, digipeaters)) {
-      LOGE("failed to send header");
-      return false;
-    }
+  Packet packet;
+  *packet.mutable_file_transfer_header() = header;
+  if (!aprs_interface_->SendBroadcastPacket(packet, callsign, digipeaters)) {
+    LOGE("failed to send header");
+    return false;
+  }
 
-    for (size_t i = 0; i < chunks.size(); i++) {
-      packet.Clear();
-      *packet.mutable_file_transfer_chunk() = chunks[i];
-      if (!aprs_interface_->SendBroadcastPacket(
-            packet, callsign, digipeaters)) {
-        LOGE("failed to send chunk %zu", i);
-        return false;
-      }
+  for (size_t i = 0; i < chunks.size(); i++) {
+    packet.Clear();
+    *packet.mutable_file_transfer_chunk() = chunks[i];
+    if (!aprs_interface_->SendBroadcastPacket(
+          packet, callsign, digipeaters)) {
+      LOGE("failed to send chunk %zu", i);
+      return false;
     }
   }
 

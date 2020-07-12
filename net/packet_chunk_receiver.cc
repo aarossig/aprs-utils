@@ -41,6 +41,15 @@ bool PacketChunkReceiver::PushPacketChunk(
     return false;
   }
 
+  auto completed_it = std::find(
+      completed_packets_.begin(), completed_packets_.end(),
+      chunk.payload_id());
+  if (completed_it != completed_packets_.end()) {
+    LOGI("received packet chunk for completed payload %" PRIu32,
+        chunk.payload_id());
+    return false;
+  }
+
   for (size_t i = 0; i < packets_.size(); i++) {
     auto& packet_chunks = packets_[i];
     if (packet_chunks.chunks.front().payload_id() == chunk.payload_id()) {
@@ -63,8 +72,8 @@ bool PacketChunkReceiver::PushPacketChunk(
       packet_chunks.chunks.push_back(chunk);
       bool is_complete = packet_chunks.IsComplete(packet);
       if (is_complete) {
+        completed_packets_.push_back(chunk.payload_id());
         packets_.erase(packets_.begin() + i);
-        // TODO(aarossig): push to a completed list.
       }
 
       return is_complete;
@@ -79,6 +88,7 @@ bool PacketChunkReceiver::PushPacketChunk(
   packet_chunks.last_fragment_time_us = GetTimeNowUs();
   packet_chunks.chunks.push_back(chunk);
   if (packet_chunks.IsComplete(packet)) {
+    completed_packets_.push_back(chunk.payload_id());
     return true;
   }
 

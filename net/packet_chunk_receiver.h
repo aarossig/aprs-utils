@@ -47,6 +47,9 @@ class PacketChunkReceiver : public NonCopyable {
 
   // The list of incoming packet chunks.
   std::vector<PacketChunks> packets_;
+
+  // The list of completed packets to avoid receiving the same frame twice.
+  std::vector<uint32_t> completed_packets_;
 };
 
 }  // namespace au

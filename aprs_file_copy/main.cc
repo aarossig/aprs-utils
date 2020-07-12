@@ -57,10 +57,6 @@ int main(int argc, char** argv) {
       "that support progressive encoding such as JPEG or text files. Passing "
       "zero will not chunk the file.",
       false, 0, "bytes", cmd);
-  TCLAP::ValueArg<size_t> file_retransmit_count_arg("",
-      "file_retransmit_count", "The number of times to retransmit a file "
-      "when running in ACKless mode.", false,
-      au::FileSender::kDefaultRetransmitCount, "count", cmd);
   TCLAP::ValueArg<float> aprs_transmit_interval_s_arg("",
       "aprs_transmit_interval_s",
       "The amount of time between APRS transmissions.",
@@ -68,6 +64,9 @@ int main(int argc, char** argv) {
   TCLAP::ValueArg<size_t> aprs_max_packet_size_arg("", "aprs_max_packet_size",
       "The maximum size of an APRS packet to transfer.",
       false, au::APRSInterface::kDefaultMaxPacketSize, "bytes", cmd);
+  TCLAP::ValueArg<size_t> aprs_retransmit_count_arg("",
+      "aprs_retransmit_count", "The number of times to retransmit a packet.",
+      false, au::APRSInterface::kDefaultRetransmitCount, "count", cmd);
   TCLAP::ValueArg<std::string> tnc_hostname_arg("", "tnc_hostname",
       "The hostname of the TNC to connect to.", false, "localhost",
       "hostname", cmd);
@@ -91,6 +90,7 @@ int main(int argc, char** argv) {
 
   au::APRSInterface::Config aprs_config;
   aprs_config.transmit_interval_s = aprs_transmit_interval_s_arg.getValue();
+  aprs_config.retransmit_count = aprs_retransmit_count_arg.getValue();
   aprs_config.max_packet_size = aprs_max_packet_size_arg.getValue();
 
   // Setup the APRS interface.
@@ -107,8 +107,7 @@ int main(int argc, char** argv) {
   // Perform the file transger operation.
   int return_code = -1;
   if (!send_file_arg.getValue().empty()) {
-    au::FileSender file_sender(aprs_interface.get(),
-        file_retransmit_count_arg.getValue());
+    au::FileSender file_sender(aprs_interface.get());
     if (file_sender.Send(send_file_arg.getValue(),
           max_file_chunk_size_arg.getValue(), {callsign_arg.getValue(), 0},
           {peer_callsign_arg.getValue(), 0}, {})) {

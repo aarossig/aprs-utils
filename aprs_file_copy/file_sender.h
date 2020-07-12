@@ -27,12 +27,8 @@ namespace au {
 // An class that is responsible for sending a file over an APRS link.
 class FileSender : public NonCopyable {
  public:
-  // The default number of times to retransmit a file when running in ackless
-  // mode.
-  static constexpr size_t kDefaultRetransmitCount = 3;
-
   // Setup the file sender with the filename to send.
-  FileSender(APRSInterface* aprs_interface, size_t retransmit_count);
+  FileSender(APRSInterface* aprs_interface);
 
   // Sends the file to the file, returning true if successful. Status is logged.
   bool Send(const std::string& filename, size_t max_chunk_size,
@@ -42,9 +38,6 @@ class FileSender : public NonCopyable {
  private:
   // The interface to send/receive APRS packets over.
   APRSInterface* const aprs_interface_;
-
-  // The number of times to send a file when running in ACKless mode.
-  const size_t retransmit_count_;
 
   // The next transfer ID to use when sending a file.
   uint32_t next_transfer_id_;
