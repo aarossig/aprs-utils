@@ -114,6 +114,9 @@ bool PacketChunkReceiver::PacketChunks::IsComplete(Packet* packet) {
     LOGFATAL("failed to deserialize payload");
   }
 
+  LOGI("complete packet %" PRIu32 " received %zu/%" PRIu32 " bytes",
+      chunks.front().payload_id(), serialized_payload.size(),
+      chunks.front().total_payload_size());
   return true;
 }
 

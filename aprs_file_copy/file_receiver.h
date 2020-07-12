@@ -49,6 +49,9 @@ class FileReceiver : public NonCopyable {
     // The set of chunks that have been received thus far.
     std::vector<Packet::FileTransferChunk> chunks;
 
+    // Set to true when the entire file has been received.
+    bool is_complete;
+
     // Returns the transfer id for these chunks.
     uint32_t GetId() const;
   };

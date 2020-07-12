@@ -43,22 +43,18 @@ bool FileReceiver::Receive(const CallsignConfig& callsign,
       continue;
     }
 
-    if (packet.has_file_transfer_header()) {
+    switch (packet.type_case()) {
+      case Packet::kFileTransferHeader:
       LOGI("received transfer request with id %" PRIu32 " for file '%s'",
           packet.file_transfer_header().id(),
           StringFormatNonPrintables(
             packet.file_transfer_header().filename()).c_str());
-    } else if (packet.has_file_transfer_chunk()) {
-      LOGI("received transfer chunk id %" PRIu32 " for transfer %" PRIu32,
-          packet.file_transfer_chunk().chunk_id(),
-          packet.file_transfer_chunk().id());
-    }
-
-    switch (packet.type_case()) {
-      case Packet::kFileTransferHeader:
         HandleTransferHeader(packet.file_transfer_header());
         break;
       case Packet::kFileTransferChunk:
+      LOGI("received transfer chunk id %" PRIu32 " for transfer %" PRIu32,
+          packet.file_transfer_chunk().chunk_id(),
+          packet.file_transfer_chunk().id());
         HandleTransferChunk(packet.file_transfer_chunk());
         break;
       default:
@@ -110,7 +106,10 @@ void FileReceiver::HandleTransferHeader(
     FileChunks chunks;
     chunks.last_time_us = GetTimeNowUs();
     chunks.header = header;
+    chunks.is_complete = false;
     file_chunks_.push_back(chunks);
+  } else if (file_chunks->is_complete) {
+    return;
   } else {
     file_chunks->last_time_us = GetTimeNowUs();
     file_chunks->header = header;
@@ -135,7 +134,10 @@ void FileReceiver::HandleTransferChunk(
     FileChunks chunks;
     chunks.last_time_us = GetTimeNowUs();
     chunks.chunks.push_back(chunk);
+    chunks.is_complete = false;
     file_chunks_.push_back(chunks);
+  } else if (file_chunks->is_complete) {
+    return;
   } else {
     file_chunks->last_time_us = GetTimeNowUs();
 
@@ -181,18 +183,24 @@ void FileReceiver::HandleTransferChunk(
       file_contents += chunk.chunk();
     }
 
-    if (!file_contents.empty() && file_chunks->header.filename().empty()) {
-      LOGI("header unavailable to write file contents");
-    } else if (!file_contents.empty()) {
-      // TODO(aarossig): sanitize the path.
-      LOGI("writing file '%s' to disk", file_chunks->header.filename().c_str());
-      WriteStringToFile(file_chunks->header.filename(),
-          file_contents);
+    if (!file_contents.empty()) {
+      if (!file_chunks->header.has_filename()) {
+        LOGI("header unavilable to write file contents for transfer %" PRIu32,
+            file_chunks->GetId());
+      } else {
+        // TODO(aarossig): sanitize the path.
+        LOGI("writing file '%s' to disk",
+            file_chunks->header.filename().c_str());
+        WriteStringToFile(file_chunks->header.filename(),
+            file_contents);
+      }
     }
 
     if (file_contents.size() == file_chunks->header.size()) {
       LOGI("file transfer '%s' complete",
           file_chunks->header.filename().c_str());
+      file_chunks->chunks.clear();
+      file_chunks->is_complete = true;
     }
   }
 }
