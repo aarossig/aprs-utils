@@ -70,6 +70,23 @@ aprs-file-copy --callsign KN6FVU \
     --receive
 ```
 
+## dependencies
+
+This project has some dependencies which must be met in order to build.
+
+```
+boost-filesystem
+cmake
+libb64
+libsdl-net
+pkg-config
+protobuf
+tclap
+```
+
+CMake should do a reasonable job of keeping track of which dependencies are
+missing from your system when you attempt to build.
+
 ## building
 
 This project builds with `cmake`, so following the standard workflow should
