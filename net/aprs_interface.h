@@ -36,7 +36,7 @@ class APRSInterface {
   };
 
   // The interval in seconds between transmissions.
-  static constexpr float kDefaultTransmitIntervalS = 10.0f;
+  static constexpr float kDefaultTransmitIntervalS = 20.0f;
 
   // The maximum number of bytes that can be sent at a time.
   static constexpr size_t kDefaultMaxPacketSize = 100;

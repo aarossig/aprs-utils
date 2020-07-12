@@ -80,17 +80,11 @@ int main(int argc, char** argv) {
   TCLAP::ValueArg<uint16_t> aprs_is_port_arg("", "aprs_is_port",
       "The port of the APRS-IS service to connect to.", false, 10152,
       "port", cmd);
-  TCLAP::ValueArg<std::string> aprs_is_callsign_arg("", "aprs_is_callsign",
-      "The callsign to authenticate with the APRS-IS service.", false,
-      "", "callsign", cmd);
   cmd.parse(argc, argv);
 
   // Validate arguments.
   if (!send_file_arg.getValue().empty() && use_aprs_is_arg.getValue()) {
     LOGFATAL("unable to use APRS-IS to send files");
-  } else if (use_aprs_is_arg.getValue()
-      && aprs_is_callsign_arg.getValue().empty()) {
-    LOGFATAL("must provide a callsign to authenticate APRS-IS with");
   }
 
   // TODO: parse all callsign arguments into CallsignConfig.
@@ -103,8 +97,7 @@ int main(int argc, char** argv) {
   std::unique_ptr<au::APRSInterface> aprs_interface;
   if (use_aprs_is_arg.getValue()) {
     aprs_interface = std::make_unique<au::InternetAPRSInterface>(
-        aprs_config,
-        au::CallsignConfig({aprs_is_callsign_arg.getValue(), 0}),
+        aprs_config, au::CallsignConfig({callsign_arg.getValue(), 0}),
         aprs_is_hostname_arg.getValue(), aprs_is_port_arg.getValue());
   } else {
     aprs_interface = std::make_unique<au::TNCAPRSInterface>(

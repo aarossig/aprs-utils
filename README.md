@@ -24,3 +24,60 @@ small files. The effective data rate will end up being in the neighborhood of
 1-10 bytes/sec (less than 10% of APRS total available bandwidth). This gives an
 expectation that file transfers could take 10-15 minutes to complete, even for
 small files.
+
+### example usage
+
+The primary modes that this tool operates in is sender and receiver. These
+are controlled by the flags `--send` and `--receive`.
+
+#### broadcast sender
+
+`aprs-file-copy` supports transmitting files via RF through the use of a TNC
+(Terminal Node Controller). Example usage:
+
+```
+aprs-file-copy --callsign <your call> \ # You station callsign.
+    --send <file to send>               # The path to the file to transmit
+```
+
+This will connect to the TNC running on localhost (`direwolf` typically). This
+can be overridden with the `--tnc_hostname` flag to connect to a TNC that is
+running on another machine.
+
+#### broadcast receiver
+
+##### RF
+
+`aprs-file-copy` supports receiving from RF via TNC. Example usage:
+
+```
+aprs-file-copy --callsign <your call> \
+    --receive
+```
+
+This will connect to the TNC running on localhost (`direwolf` typically). This
+can be overridden with the `--tnc_hostname` flag to connect to a TNC that is
+running on another machine. The same as the file sender.
+
+##### APRS-IS
+
+`aprs-file-copy` also supports receiving files from the internet using the
+APRS-IS (APRS Internet Services) servers. Example usage:
+
+```
+aprs-file-copy --callsign KN6FVU \
+    --use_aprs_is \
+    --receive
+```
+
+## building
+
+This project builds with `cmake`, so following the standard workflow should
+allow you to build.
+
+```
+mkdir build
+cd build
+cmake ..
+make -j`nproc`
+```
