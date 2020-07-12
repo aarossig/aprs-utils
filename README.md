@@ -70,6 +70,9 @@ aprs-file-copy --callsign <your call> \
     --receive
 ```
 
+The `InternetAPRSInterface` intentionally does not support publishing packets
+via the APRS-IS network. Packets on APRS-IS are intended to originate from RF.
+
 ## dependencies
 
 This project has some dependencies which must be met in order to build.
