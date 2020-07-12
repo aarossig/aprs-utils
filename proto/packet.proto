@@ -72,9 +72,12 @@ message Packet {
     // The transfer id for this file transfer chunk.
     optional uint32 id = 1;
 
+    // The id of this chunk to allow forming a complete file.
+    optional uint32 chunk_id = 2;
+
     // The chunk of a file. These are sent sequentially and appended by the
     // receiver until the complete file is received.
-    optional bytes chunk = 2;
+    optional bytes chunk = 3;
 
     // TODO(aarossig): consider adding chunk_gz, chunk_xz, etc to support
     // different modes. If compression can help, we should use it.

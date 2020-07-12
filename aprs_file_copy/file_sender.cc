@@ -52,6 +52,7 @@ bool FileSender::Send(const std::string& filename, size_t max_chunk_size,
   LOGI("name='%s', size=%zu", transfer_filename.c_str(), file_contents.size());
 
   std::vector<Packet::FileTransferChunk> chunks;
+  uint32_t chunk_id = 1;
   for (size_t offset = 0; offset < file_contents.size();) {
     size_t chunk_size =
       max_chunk_size == 0 ? file_contents.size() : max_chunk_size;
@@ -59,6 +60,7 @@ bool FileSender::Send(const std::string& filename, size_t max_chunk_size,
 
     Packet::FileTransferChunk chunk;
     chunk.set_id(header.id());
+    chunk.set_chunk_id(chunk_id++);
     chunk.set_chunk(file_contents.substr(offset, chunk_size));
     chunks.push_back(chunk);
     offset += chunk_size;

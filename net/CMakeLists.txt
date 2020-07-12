@@ -9,6 +9,7 @@
 add_library(net
   aprs_interface.cc
   internet_aprs_interface.cc
+  packet_chunk_receiver.cc
   tnc_aprs_interface.cc
 )
 

@@ -37,6 +37,33 @@ class FileReceiver : public NonCopyable {
  private:
   // The interface to send/receive APRS pakcets over.
   APRSInterface* const aprs_interface_;
+
+  // Incoming chunks for a file.
+  struct FileChunks {
+    // The timestamp of the last update to this file chunks tracker.
+    uint64_t last_time_us;
+
+    // The header for this file transfer.
+    Packet::FileTransferHeader header;
+
+    // The set of chunks that have been received thus far.
+    std::vector<Packet::FileTransferChunk> chunks;
+
+    // Returns the transfer id for these chunks.
+    uint32_t GetId() const;
+  };
+
+  // The list of incoming file chunks.
+  std::vector<FileChunks> file_chunks_;
+
+  // Checks if a file transfer has been started for a given id.
+  FileChunks* GetFileChunksForId(uint32_t id);
+
+  // Handles a file transfer header.
+  void HandleTransferHeader(const Packet::FileTransferHeader& header);
+
+  // Handles a file transfer chunk.
+  void HandleTransferChunk(const Packet::FileTransferChunk& chunk);
 };
 
 }  // namespace au

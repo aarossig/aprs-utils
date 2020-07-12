@@ -35,6 +35,7 @@ InternetAPRSInterface::InternetAPRSInterface(
         SDLNet_GetError());
   }
 
+  LOGI("connecting to %s:%" PRIu16, hostname.c_str(), port);
   socket_ = SDLNet_TCP_Open(&ip);
   if (!socket_) {
     LOGFATAL("failed to open socket: %s",
@@ -53,6 +54,7 @@ InternetAPRSInterface::InternetAPRSInterface(
         SDLNet_GetError());
   }
 
+  LOGI("reading server version");
   std::string server_version;
   if (!ReadServerVersion(&server_version)) {
     LOGFATAL("failed to read the server version");

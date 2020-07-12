@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "net/packet_chunk_receiver.h"
 #include "proto/packet.pb.h"
 #include "util/callsign.h"
 
@@ -50,6 +51,10 @@ class APRSInterface {
       const CallsignConfig& source,
       const std::vector<CallsignConfig>& digipeaters);
 
+  // Receives a packet in ACKless mode.
+  bool ReceiveBroadcastPacket(Packet* packet,
+      CallsignConfig* source, std::vector<CallsignConfig>* digipeaters);
+
   // Sends a frame over APRS. This is a lower-level interface that is not
   // typically used.
   virtual bool Send(const std::string& payload,
@@ -69,6 +74,9 @@ class APRSInterface {
 
   // The id of the next payload from this station.
   uint32_t next_payload_id_;
+
+  // Handles receiving chunks until completed packets are received.
+  PacketChunkReceiver chunk_receiver_;
 
   // Returns the ID of the next payload to send.
   uint32_t GetNextPayloadId();

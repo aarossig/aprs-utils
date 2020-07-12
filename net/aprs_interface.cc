@@ -24,6 +24,11 @@
 #define LOG_TAG "APRSInterface"
 
 namespace au {
+namespace {
+
+const CallsignConfig kBroadcastDestination({kBroadcastCallsign, 0});
+
+}  // anonymous namespace
 
 APRSInterface::APRSInterface(const Config& config)
     : config_(config),
@@ -32,8 +37,6 @@ APRSInterface::APRSInterface(const Config& config)
 bool APRSInterface::SendBroadcastPacket(const Packet& packet,
     const CallsignConfig& source,
     const std::vector<CallsignConfig>& digipeaters) {
-  const CallsignConfig kBroadcastDestination({kBroadcastCallsign, 0});
-
   std::string serialized_packet;
   if (!packet.SerializeToString(&serialized_packet)) {
     LOGFATAL("failed to serialize packet");
@@ -74,6 +77,45 @@ bool APRSInterface::SendBroadcastPacket(const Packet& packet,
   }
 
   return true;
+}
+
+bool APRSInterface::ReceiveBroadcastPacket(Packet* packet,
+    CallsignConfig* source, std::vector<CallsignConfig>* digipeaters) {
+  CallsignConfig destination;
+  std::string payload;
+
+  while (true) {
+    if (!Receive(source, &destination, digipeaters,
+          &payload, /*timeout_ms=*/0)) {
+      LOGE("failed to receive broadcast packet");
+      return false;
+    }
+
+    if (destination == kBroadcastDestination) {
+      // Check the header.
+      if (!StringStartsWith(payload, "{")) {
+        LOGE("invalid payload");
+      }
+
+      // Trim the header and decode base64.
+      payload = payload.substr(1);
+      std::string serialized_packet = StringBase64Decode(payload);
+
+      // Attempt to deserialize.
+      PacketChunk packet_chunk;
+      if (!packet_chunk.ParseFromString(serialized_packet)) {
+        LOGE("received malformed packet chunk");
+        continue;
+      } else if (!packet_chunk.has_chunk()) {
+        LOGE("received packet chunk with missing chunk");
+        continue;
+      }
+
+      if (chunk_receiver_.PushPacketChunk(packet_chunk.chunk(), packet)) {
+        return true;
+      }
+    }
+  }
 }
 
 uint32_t APRSInterface::GetNextPayloadId() {
