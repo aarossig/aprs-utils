@@ -65,7 +65,7 @@ running on another machine. The same as the file sender.
 APRS-IS (APRS Internet Services) servers. Example usage:
 
 ```
-aprs-file-copy --callsign KN6FVU \
+aprs-file-copy --callsign <your call> \
     --use_aprs_is \
     --receive
 ```
