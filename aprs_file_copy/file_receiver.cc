@@ -132,9 +132,9 @@ void FileReceiver::HandleTransferChunk(
   } else {
     file_chunks->last_time_us = GetTimeNowUs();
     for (const auto& existing_chunk : file_chunks->chunks) {
-      if (existing_chunk.id() == chunk.id()) {
+      if (existing_chunk.chunk_id() == chunk.chunk_id()) {
         LOGI("ignoring chunk id %" PRIu32 " that '%s' has already received",
-            existing_chunk.id(), file_chunks->header.filename().c_str());
+            existing_chunk.chunk_id(), file_chunks->header.filename().c_str());
         return;
       }
     }
@@ -146,14 +146,14 @@ void FileReceiver::HandleTransferChunk(
           return a.id() < b.id();
         });
 
-    uint32_t id = 1;
+    uint32_t chunk_id = 1;
     std::string file_contents;
     for (const auto& chunk : file_chunks->chunks) {
-      if (chunk.id() == id++) {
-        file_contents += chunk.chunk();
-      } else {
+      if (chunk.chunk_id() != chunk_id++) {
         break;
       }
+
+      file_contents += chunk.chunk();
     }
 
     if (!file_contents.empty()) {
