@@ -23,6 +23,15 @@
 
 // TODO(aarossig): None of this is thread safe.
 
+//#define ENABLE_LOGV
+
+#ifdef ENABLE_LOGV
+#define LOGV(format, ...) \
+  fprintf(stderr, LOG_TAG ": " format "\n", ##__VA_ARGS__)
+#else
+#define LOGV(format, ...)
+#endif
+
 // Informational logs.
 #define LOGI(format, ...) \
   fprintf(stderr, LOG_TAG ": " format "\n", ##__VA_ARGS__)

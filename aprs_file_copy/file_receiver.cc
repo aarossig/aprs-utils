@@ -49,7 +49,8 @@ bool FileReceiver::Receive(const CallsignConfig& callsign,
           StringFormatNonPrintables(
             packet.file_transfer_header().filename()).c_str());
     } else if (packet.has_file_transfer_chunk()) {
-      LOGI("received transfer chunk with id %" PRIu32,
+      LOGI("received transfer chunk id %" PRIu32 " for transfer %" PRIu32,
+          packet.file_transfer_chunk().chunk_id(),
           packet.file_transfer_chunk().id());
     }
 
@@ -131,6 +132,16 @@ void FileReceiver::HandleTransferChunk(
     file_chunks_.push_back(chunks);
   } else {
     file_chunks->last_time_us = GetTimeNowUs();
+
+    uint32_t chunk_id = 1;
+    for (size_t i = 0; i < file_chunks->chunks.size(); i++) {
+      if (file_chunks->chunks[i].chunk_id() != chunk_id) {
+        LOGE("transfer %" PRIu32 " is missing chunk %" PRIu32 " got %" PRIu32,
+            chunk.id(), chunk_id, file_chunks->chunks[i].chunk_id());
+        break;
+      }
+    }
+
     for (const auto& existing_chunk : file_chunks->chunks) {
       if (existing_chunk.chunk_id() == chunk.chunk_id()) {
         LOGI("ignoring chunk id %" PRIu32 " that '%s' has already received",
@@ -146,7 +157,7 @@ void FileReceiver::HandleTransferChunk(
           return a.id() < b.id();
         });
 
-    uint32_t chunk_id = 1;
+    chunk_id = 1;
     std::string file_contents;
     for (const auto& chunk : file_chunks->chunks) {
       if (chunk.chunk_id() != chunk_id++) {

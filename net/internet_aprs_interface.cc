@@ -89,7 +89,7 @@ bool InternetAPRSInterface::Receive(
       LOGE("failed to receive line");
       return false;
     } else if (StringStartsWith(packet, "#")) {
-      LOGI("server sent informational packet: '%s", packet.c_str());
+      LOGV("server sent informational packet: '%s", packet.c_str());
       packet.clear();
     }
   }
