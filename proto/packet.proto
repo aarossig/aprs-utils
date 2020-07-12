@@ -8,7 +8,8 @@ package au;
 
 /* Transport ******************************************************************/
 
-// A packet chunk that can be sent by a node, with ACKs.
+// A packet chunk that can be sent by a node, with ACKs. This is the layer 2
+// protocol of this stack.
 message PacketChunk {
   // A packet that is to be sent over APRS. This should not exceed the maximum
   // allowable packet size on APRS (64-100 bytes typical).
@@ -49,7 +50,8 @@ message PacketChunk {
 
 /* Application ****************************************************************/
 
-// A packet that can be sent by a node.
+// A packet that can be sent by a node. This is the layer 3 protocol of this
+// stack.
 message Packet {
   // The header for a file transfer. This lets the receiver setup a file and
   // display progress regarding the current transfer.
