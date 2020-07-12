@@ -74,7 +74,7 @@ uint32_t FileReceiver::FileChunks::GetId() const {
     return header.id();
   }
 
-  if (chunks.empty() || chunks.front().has_id()) {
+  if (chunks.empty() || !chunks.front().has_id()) {
     LOGFATAL("invalid FileChunks tracker");
   }
 
@@ -122,6 +122,12 @@ void FileReceiver::HandleTransferChunk(
   if (!chunk.has_id()) {
     LOGE("received chunk with missing id");
     return;
+  } else if (!chunk.has_chunk_id()) {
+    LOGE("received chunk with missing chunk id");
+    return;
+  } else if (!chunk.has_chunk()) {
+    LOGE("received chunk with no contents");
+    return;
   }
 
   auto file_chunks = GetFileChunksForId(chunk.id());
@@ -154,7 +160,7 @@ void FileReceiver::HandleTransferChunk(
     std::sort(file_chunks->chunks.begin(), file_chunks->chunks.end(),
         [](const Packet::FileTransferChunk& a,
            const Packet::FileTransferChunk& b) {
-          return a.id() < b.id();
+          return a.chunk_id() < b.chunk_id();
         });
 
     chunk_id = 1;
