@@ -98,6 +98,7 @@ void FileReceiver::HandleTransferHeader(
     return;
   } else if (!header.has_size()) {
     LOGE("received header with missing size");
+    return;
   } else if (!header.has_filename()) {
     LOGE("received header with missing filename");
     return;
