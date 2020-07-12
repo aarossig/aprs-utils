@@ -142,16 +142,24 @@ void FileReceiver::HandleTransferChunk(
     uint32_t chunk_id = 1;
     for (size_t i = 0; i < file_chunks->chunks.size(); i++) {
       if (file_chunks->chunks[i].chunk_id() != chunk_id) {
-        LOGE("transfer %" PRIu32 " is missing chunk %" PRIu32 " got %" PRIu32,
-            chunk.id(), chunk_id, file_chunks->chunks[i].chunk_id());
+        LOGE("transfer %" PRIu32 " is missing chunk %" PRIu32,
+            chunk.id(), chunk_id);
         break;
       }
     }
 
     for (const auto& existing_chunk : file_chunks->chunks) {
       if (existing_chunk.chunk_id() == chunk.chunk_id()) {
-        LOGI("ignoring chunk id %" PRIu32 " that '%s' has already received",
-            existing_chunk.chunk_id(), file_chunks->header.filename().c_str());
+        if (file_chunks->header.has_filename()) {
+          LOGI("ignoring chunk id %" PRIu32 " that '%s' has already received",
+              existing_chunk.chunk_id(),
+              file_chunks->header.filename().c_str());
+        } else {
+          LOGI("ignoring chunk id %" PRIu32 " that transfer %" PRIu32 " has "
+              "already received", existing_chunk.chunk_id(),
+              file_chunks->GetId());
+        }
+
         return;
       }
     }
@@ -173,7 +181,9 @@ void FileReceiver::HandleTransferChunk(
       file_contents += chunk.chunk();
     }
 
-    if (!file_contents.empty()) {
+    if (!file_contents.empty() && file_chunks->header.filename().empty()) {
+      LOGI("header unavailable to write file contents");
+    } else if (!file_contents.empty()) {
       // TODO(aarossig): sanitize the path.
       LOGI("writing file '%s' to disk", file_chunks->header.filename().c_str());
       WriteStringToFile(file_chunks->header.filename(),
