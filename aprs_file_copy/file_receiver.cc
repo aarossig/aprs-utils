@@ -96,6 +96,11 @@ void FileReceiver::HandleTransferHeader(
   if (!header.has_id()) {
     LOGE("received header with missing id");
     return;
+  } else if (!header.has_size()) {
+    LOGE("received header with missing size");
+  } else if (!header.has_filename()) {
+    LOGE("received header with missing filename");
+    return;
   }
 
   auto file_chunks = GetFileChunksForId(header.id());
